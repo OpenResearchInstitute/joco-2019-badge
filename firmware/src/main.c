@@ -60,16 +60,16 @@ void __boot() {
 	util_gfx_set_font(FONT_SMALL);
 	util_gfx_set_cursor(0, 4);
 	util_gfx_set_color(COLOR_WHITE);
-	util_gfx_print("Trans-Ionospheric\n");
+	util_gfx_print("JOCO Cruise 2019\n");
 	nrf_delay_ms(400);
-	util_gfx_print("Filament voltage ON\n");
+	util_gfx_print("64K RAM SYSTEM 38911 BYTES FREE\n");
 	nrf_delay_ms(1000);
 
-	util_gfx_print("Warmed up!\n");
+	util_gfx_print("READY\n");
 	nrf_delay_ms(400);
-	util_gfx_print("# /bin/transio --gui\n");
+	util_gfx_print("# /bin/joco --gui\n");
 	nrf_delay_ms(400);
-	util_gfx_print("ON THE AIR");
+	util_gfx_print("Launching...");
 	nrf_delay_ms(1000);
 
 	//Loop the intro animation. Loop=true allows user to quit
@@ -132,7 +132,7 @@ int main(void) {
 	}
 
 	if (!mbp_state_load()) {
-		mbp_ui_popup("Trans-IO", "Welcome to the TransIonospheric Badge and Radio Peripheral! Select a name. You can change your name later from settings.");
+		mbp_ui_popup("JOCO2019", "Welcome to the JoCo Cruise 2019 Badge! Select a name. You can change your name later from settings.");
 		mbp_state_new();
 		mbp_system_name_select();
 		mbp_state_save();

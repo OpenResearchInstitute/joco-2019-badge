@@ -31,8 +31,16 @@
 
 #include "../system.h"
 
-#define BACKGROUND_LED_TIME_MS     10
+#define BACKGROUND_LED_TIME_MS     10  // -spc- NOTE was called tooth_timer
 #define BG_TICKS_PER_SECOND		(1000/BACKGROUND_LED_TIME_MS)
+
+#define TOOTH_SAT                  1.0
+#define TOOTH_VAL                  0.5 // (brightness)
+#define TOOTH_FLASH_MINTIME         50 // min time between flashes in tens of mS
+#define TOOTH_FLASH_MAXTIME        500 // max time between flashes in tens of mS
+#define TOOTH_FLASH_LEN              3 // min flash length in tens of mS
+
+#define EYE_HUE_STEP                .00015
 
 #define SCROLL_CHAR_WIDTH           16
 #define SCROLL_CHAR_HEIGHT          31
@@ -41,6 +49,16 @@
 
 APP_TIMER_DEF(m_background_led_timer);
 APP_TIMER_DEF(m_scroll_led_timer);
+
+// For a shiny gold tooth
+static float m_tooth_hue = TOOTH_HUE_GOLD;
+static float m_tooth_sat = 1.0;
+static float m_tooth_val = 1.0;
+static uint32_t tooth_flash_counter = 100;
+static bool tooth_flashing = false;
+
+static float m_eye_hue = 0;
+// -spc- TODO remove? static bool m_tooth_eye_running = false;
 
 static bool m_background_led_running = false;
 
@@ -106,6 +124,20 @@ static void __led_sparkle_single(uint8_t frame, void *p_data) {
 }
 */
 
+static void __led_chase_cw_callback(uint8_t frame, void *p_data) {
+    uint8_t *p_index = (uint8_t *) p_data;
+    uint8_t order[] = { 0, 1, 2, 3, 7, 11, 10, 9, 8, 4 };
+
+    util_led_set(order[*p_index], 255, 0, 0);
+    util_led_show();
+    util_led_set(order[*p_index], 0, 0, 0);
+
+    (*p_index)++;
+    if (*p_index > 9) {
+        *p_index = 0;
+    }
+}
+
 void __led_hue_cycle(uint8_t frame, void *p_data) {
     uint8_t *p_hue = (uint8_t *) p_data;
     float hue = (float) (*p_hue) / 100.0;
@@ -147,7 +179,7 @@ static void __mbp_bling_rainbow_eye_callback(uint8_t frame, void *data) {
     float hue = ((float) *p_data) / 100.0;
 
     uint32_t rgb = util_led_hsv_to_rgb(hue, 1.0, 1.0);
-//    util_led_set_rgb(LED_RIGHT_EYE_INDEX, rgb);
+    util_led_set_rgb(LED_RIGHT_EYE_INDEX, rgb);
     util_led_set_rgb(6, rgb);
     util_led_show();
 
@@ -378,6 +410,126 @@ void mbp_bling_led_rainbow_callback(uint8_t frame, void *p_data) {
 // template
 //void mbp_bling_fillthisin(void *data) { simple_filebased_bling("BLING/JOCO/DRWHOTIM.RAW", "BLING/TUNNEL.RGB");}
 
+void mbp_bling_badgers() {
+    uint8_t hue = 0;
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/AND!XOR/BADGERS.RAW", 0, 0, 128, 128, &__mbp_bling_rainbow_eye_callback, true, &hue);
+}
+
+void mbp_bling_wheaton() {
+    uint8_t hue = 0;
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/JOCO/WWSPIN.RAW", 0, 0, 128, 128, &__led_chase_cw_callback, true, &hue);
+}
+
+static void __led_jollyroger(uint8_t f_unused, void *p_data) {
+    uint8_t eye_closed[] = { 4, 5, 6, 7 };
+    uint8_t eye_open[] = { 1, 2, 4, 7, 9, 10 };
+    uint8_t frame = *((uint8_t *) p_data);
+
+    //Clear all colors
+    for (uint8_t i = 0; i < LED_COUNT; i++) {
+        util_led_set_rgb(i, LED_COLOR_BLACK);
+    }
+
+    //Compute and set the eye colors
+    util_led_set_rgb(LED_RIGHT_EYE_INDEX, LED_COLOR_EYES);
+
+    uint32_t tooth_color = util_led_hsv_to_rgb(TOOTH_HUE_GOLD, 1, 0.5);
+    util_led_set_rgb(LED_TOOTH_INDEX, tooth_color);
+
+    //Large Eye
+    if (frame < 20) {
+        for (uint8_t i = 0; i < 6; i++) {
+            util_led_set_rgb(eye_open[i], LED_COLOR_EYES);
+        }
+    } else {
+        for (uint8_t i = 0; i < 4; i++) {
+            util_led_set_rgb(eye_closed[i], LED_COLOR_EYES);
+        }
+    }
+
+    //latch
+    util_led_show();
+
+    frame = (frame + 1) % 40;
+    *((uint8_t *) p_data) = frame;
+}
+
+void mbp_bling_skull_crossbones() {
+    uint8_t hue = 0;
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/JOCO/SKLCROSS.RAW", 0, 0, 128, 128, &__led_jollyroger, true, &hue);
+}
+
+void mbp_bling_5th_element_dance(void *data) { simple_filebased_bling("BLING/JOCO/5THEL.RAW", "BLING/FADEBLUE.RGB"); }
+
+void mbp_bling_candy_mountain(void *data) { simple_filebased_bling("BLING/JOCO/CANDYMTN.RAW", "BLING/BLUPRPSW.RGB"); }
+
+void mbp_bling_dancing_cyberman(void *data) { simple_filebased_bling("BLING/JOCO/CYBERMAN.RAW", "BLING/FADEGRN.RGB"); }
+
+void mbp_bling_drwho_time(void *data) { simple_filebased_bling("BLING/JOCO/DRWHOTIM.RAW", "BLING/TUNNEL.RGB");}
+
+void mbp_bling_duckhunt(void *data) { simple_filebased_bling("BLING/JOCO/DUCKHUNT.RAW", "BLING/COLORS3.RGB"); }
+
+void mbp_bling_fallout_boygirl_drinking(void *data) { simple_filebased_bling("BLING/JOCO/FODRINK.RAW", "BLING/BOUNCE.RGB"); }
+
+void mbp_bling_fallout_boy_science(void *data) { simple_filebased_bling("BLING/JOCO/FOSCI.RAW", "BLING/TUNNEL.RGB"); }
+
+void mbp_bling_get_on_my_horse(void *data) { simple_filebased_bling("BLING/JOCO/MYHORSE.RAW", "BLING/IRADESC.RGB"); }
+
+void mbp_bling_multipass_leelo(void *data) { simple_filebased_bling("BLING/JOCO/MLTIPASS.RAW", "BLING/REDORNG.RGB"); }
+
+void mbp_bling_outer_limits() {
+    uint8_t hue = 0;
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/JOCO/OUTERLIM.RAW", 0, 0, 128, 128, &__mbp_bling_glitter_callback, true, &hue);
+}
+
+void mbp_bling_portal_frying_pan(void *data) { simple_filebased_bling("BLING/JOCO/PORTALFP.RAW", "BLING/FADEYLLW.RGB"); }
+
+void mbp_bling_portal_wink(void *data) { simple_filebased_bling("BLING/JOCO/PORTALWN.RAW", "BLING/CIRCLES.RGB"); }
+
+void mbp_bling_portals(void *data) { simple_filebased_bling("BLING/JOCO/PORTALS.RAW", "BLING/TETRIS.RGB"); }
+
+void mbp_bling_sleestaks(void *data) { simple_filebased_bling("BLING/JOCO/SLEESTAK.RAW", "BLING/GRNYELL.RGB"); }
+
+void mbp_bling_tardis_nyan(void *data) { simple_filebased_bling("BLING/JOCO/TARDNYAN.RAW", "BLING/BOUNCE.RGB"); }
+
+void mbp_bling_twilight_zone() {
+    uint8_t hue = 0;
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/JOCO/TWILITE.RAW", 0, 0, 128, 128, &__mbp_bling_glitter_callback, true, &hue);
+}
+
+void mbp_bling_zombie_nyan(void *data) { simple_filebased_bling("BLING/JOCO/ZOMBNYAN.RAW", "BLING/BOUNCE.RGB"); }
+
+void mbp_bling_damon() {
+    util_led_clear();
+    uint8_t index = 0;
+    uint8_t count = 4;
+
+    char *modes[] = { "BLING/AND!XOR/DAMON1.RAW", "BLING/AND!XOR/DAMON2.RAW", "BLING/AND!XOR/DAMON3.RAW", "BLING/AND!XOR/DAMON4.RAW" };
+    uint8_t button = 0;
+
+    util_led_clear();
+
+    //If anything other than left button is pressed cycle modes
+    while ((button & BUTTON_MASK_LEFT) == 0) {
+        uint8_t hue = 0;
+        button = util_gfx_draw_raw_file(modes[index], 0, 0, 128, 128, &__led_chase_cw_callback, true, &hue);
+        index = (index + 1) % count;
+    }
+}
+
+void mbp_bling_meatspin(void *data) { simple_filebased_bling("BLING/AND!XOR/MEATSPIN.RAW", "BLING/AND!XOR/MEATSPIN.RGB"); }
+
+void mbp_bling_whats_up() {
+    util_led_clear();
+    uint8_t hue = 0; //hue is normally a float 0 to 1, pack it in an 8 bit int
+    util_gfx_draw_raw_file("BLING/AND!XOR/HEMANHEY.RAW", 0, 0, 128, 128, &__led_sparkle, true, &hue);
+}
+
 void mbp_bling_flames(void *data) { simple_filebased_bling("BLING/AND!XOR/FLAMES.RAW", "BLING/FLAMES.RGB"); }
 
 void mbp_bling_hack_time(void *data) { simple_filebased_bling("BLING/AND!XOR/HACKTIME.RAW", "BLING/PINKBLUE.RGB"); }
@@ -459,6 +611,13 @@ void mbp_bling_led_botnet(uint8_t frame, void *data) {
     uint8_t i = util_math_rand8_max(LED_COUNT);
     util_led_set(i, red, 0, 0);
     util_led_show();
+}
+
+void mbp_bling_major_lazer(void *data) {
+    util_led_clear();
+    UTIL_LED_ANIM_INIT(anim);
+    util_led_load_rgb_file("BLING/MAJORL1.RGB", &anim);
+    util_gfx_draw_raw_file("BLING/AND!XOR/MAJORL1.RAW", 0, 0, 128, 128, &__rgb_file_callback, true, (void *) &anim);
 }
 
 static void __matrix_callback(uint8_t frame, void *p_data) {
@@ -686,7 +845,7 @@ void mbp_bling_scroll_cycle() {
 
     uint8_t index = 0;
     uint8_t count = 3;
-    char *messages[] = { "TRANS-IONOSPHERIC ", "STINKING BADGES ", name };
+    char *messages[] = { "JOCO 2019 ", "STINKING BADGES ", name };
 
     //Start up led timer for scroll
     APP_ERROR_CHECK(app_timer_create(&m_scroll_led_timer, APP_TIMER_MODE_REPEATED, __scroll_callback));
@@ -746,6 +905,29 @@ void mbp_bling_scroll_cycle() {
 //     util_button_clear();
 // }
 
+static void __mbp_bling_toad_callback(uint8_t frame, void *p_data) {
+//Unpack hue as a float
+    uint8_t *data = (uint8_t *) p_data;
+    float hue = ((float) *data / 100.0);
+
+    util_led_set_all_rgb(util_led_hsv_to_rgb(hue, 1, .9));
+    util_led_show();
+
+    hue += 0.07;
+    if (hue >= 1) {
+        hue = 0;
+    }
+
+    //Pack the hue
+    *data = (uint8_t) (hue * 100.0);
+}
+
+void mbp_bling_toad() {
+    util_led_clear();
+    uint8_t hue = 0; //hue is normally a float 0 to 1, pack it in an 8 bit int
+    util_gfx_draw_raw_file("BLING/AND!XOR/TOAD2.RAW", 0, 0, 128, 128, &__mbp_bling_toad_callback, true, &hue);
+}
+
 static void __mbp_bling_twitter_callback(uint8_t frame, void *p_data) {
     uint8_t *p_index = (uint8_t *) p_data;
 
@@ -773,6 +955,11 @@ void mbp_bling_twitter() {
     util_led_clear();
     uint8_t index = 0xFF; //set index out of bounds of led count
     util_gfx_draw_raw_file("BLING/TWITTER/TWITTER.RAW", 0, 0, 128, 128, &__mbp_bling_twitter_callback, true, &index);
+}
+
+void mbp_bling_trololol() {
+    util_led_clear();
+    util_gfx_draw_raw_file("BLING/AND!XOR/TROLOLOL.RAW", 0, 0, 128, 128, &mbp_bling_led_botnet, true, NULL);
 }
 
 static void __mbp_defrag_callback(uint8_t frame, void *p_data) {
@@ -808,77 +995,70 @@ void mbp_bling_defrag() {
 }
 
 // called every BACKGROUND_LED_TIME_MS
+#define EYE_CYCLE_HALF 20
 static void __background_led_sch_handler(void * p_event_data, uint16_t event_size) {
-	static int bg_cycle_count = 0;
+    static int bg_cycle_count = 0;
+    uint8_t eye_closed[] = { 4, 5, 6, 7 };
+    uint8_t eye_open[] = { 1, 2, 4, 7, 9, 10 };
 
-	// Background LEDs intended to simulate Phase 4 Ground status display:
-	if (bg_cycle_count == 3 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(8, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 4 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(9, LED_COLOR_RED);
-		util_led_set_rgb(11, LED_COLOR_RED);
-	} else if (bg_cycle_count == 7* BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(9, LED_COLOR_LIGHTBLUE);
-		util_led_set_rgb(11, LED_COLOR_RED);
-	} else if (bg_cycle_count == 8 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(7, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 10 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(12, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 11 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(9, LED_COLOR_GREEN);
-		util_led_set_rgb(11, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 14 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(13, LED_COLOR_ORANGE);
-	} else if (bg_cycle_count == 15 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(6, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 16 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(5, LED_COLOR_RED);
-	} else if (bg_cycle_count == 17 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(14, LED_COLOR_RED);
-	} else if (bg_cycle_count == 19 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(5, LED_COLOR_BLACK);
-		util_led_set_rgb(6, LED_COLOR_BLACK);
-		util_led_set_rgb(13, LED_COLOR_GREEN);
-		util_led_set_rgb(14, LED_COLOR_BLACK);
-	} else if (bg_cycle_count == 20 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(6, LED_COLOR_GREEN);
-		util_led_set_rgb(13, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 22 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(5, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 23 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(14, LED_COLOR_GREEN);
-	} else if (bg_cycle_count == 25 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(0, LED_COLOR_BLUE);
-		util_led_set_rgb(5, LED_COLOR_BLACK);
-		util_led_set_rgb(6, LED_COLOR_BLACK);
-		util_led_set_rgb(7, LED_COLOR_BLACK);
-		util_led_set_rgb(10, LED_COLOR_BLUE);
-		util_led_set_rgb(13, LED_COLOR_BLACK);
-		util_led_set_rgb(14, LED_COLOR_BLACK);
-	} else if (bg_cycle_count == 28 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(1, LED_COLOR_PURPLE);
-	} else if (bg_cycle_count == 29 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(2, LED_COLOR_PURPLE);
-	} else if (bg_cycle_count == 30 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(3, LED_COLOR_PURPLE);
-	} else if (bg_cycle_count == 31 * BG_TICKS_PER_SECOND) {
-		util_led_set_rgb(4, LED_COLOR_PURPLE);
-	} else if (bg_cycle_count == 35 * BG_TICKS_PER_SECOND) {
-		util_led_set_all_rgb(LED_COLOR_BLACK);
+    //Clear all colors
+    for (uint8_t i = 0; i < LED_COUNT; i++) {
+        util_led_set_rgb(i, LED_COLOR_BLACK);
+    }
 
-		// Simulated radio cycle now complete. Good time to HELLO neighbors!
-		app_sched_event_put(NULL, 0, hello_background_handler);
+    //Compute and set the eye colors
+    uint32_t eye_color = util_led_hsv_to_rgb(m_eye_hue, 1, 0.8);
+    util_led_set_rgb(LED_RIGHT_EYE_INDEX, eye_color);
 
-	} else if (bg_cycle_count >= 38 * BG_TICKS_PER_SECOND) {
-		bg_cycle_count = 0;
-	}
+    uint32_t tooth_color = util_led_hsv_to_rgb(m_tooth_hue, 1, 0.5);
+    util_led_set_rgb(LED_TOOTH_INDEX, tooth_color);
+
+    if (bg_cycle_count > EYE_CYCLE_HALF) {
+        //Large Eye
+        for (uint8_t i = 0; i < 6; i++) {
+            util_led_set_rgb(eye_open[i], eye_color);
+        }
+    } else {
+        //Small Eye
+        for (uint8_t i = 0; i < 4; i++) {
+            util_led_set_rgb(eye_closed[i], eye_color);
+        }
+    }
+    if (++bg_cycle_count > BG_TICKS_PER_SECOND/2)
+        bg_cycle_count = 0;
 
     util_led_show();
-	bg_cycle_count++;
 
-	// If computations are extensive, do them here, not before
-	// updating the display.
+    // If computations are extensive, do them here, not before
+    // updating the display.
 
+    // Update the tooth for next pass
+    if (tooth_flashing) {
+        // we're twinkling, see if we're done
+        if (--tooth_flash_counter == 0) {
+            m_tooth_hue = TOOTH_HUE_GOLD;
+            m_tooth_sat = TOOTH_SAT;
+            m_tooth_val = TOOTH_VAL;
+            tooth_flash_counter = util_math_rand32_max(TOOTH_FLASH_MAXTIME-TOOTH_FLASH_MINTIME) + TOOTH_FLASH_MINTIME;
+            tooth_flashing = false;
+        }
+    } else {
+        // we're waiting to twinkle again, see if we're done
+        if (--tooth_flash_counter == 0) {
+            // start a flash
+            m_tooth_hue = TOOTH_HUE_GOLD;
+            m_tooth_sat = 0;
+            m_tooth_val = TOOTH_VAL;
+            tooth_flash_counter = TOOTH_FLASH_LEN;
+            tooth_flashing = true;
+        }
+    }
+
+    //Change the eye hue for next pass
+    m_eye_hue += EYE_HUE_STEP;
+    if (m_eye_hue >= 1.0) {
+        m_eye_hue -= 1.0;
+    }
 }
 
 static void __background_led_timer_handler(void *p_data) {

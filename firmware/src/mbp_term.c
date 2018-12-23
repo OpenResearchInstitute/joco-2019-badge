@@ -738,7 +738,7 @@ static int __cmd_uname(int argc, char **argv) {
 }
 
 static int __cmd_motd(int argc, char **argv) {
-	mbp_term_print("Trans-Ionospheric Badge");
+	mbp_term_print("JoCo 2019 Badge");
 	mbp_term_print("@firmwarez");
 	mbp_term_print("@mustbeart");
 	mbp_term_print("@abraxas3d");
@@ -756,7 +756,7 @@ static int __cmd_motd(int argc, char **argv) {
 	mbp_term_print("╚▒▒-▤8−◦");
 	mbp_term_print("\r");
 	mbp_term_print("Type 'help' to");
-	mbp_term_print("receive elmering.");
+	mbp_term_print("Kill All Humans!");
 	mbp_term_print("\r");
 	return 0;
 }
