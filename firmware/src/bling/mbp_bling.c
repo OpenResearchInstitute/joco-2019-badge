@@ -466,6 +466,8 @@ void mbp_bling_5th_element_dance(void *data) { simple_filebased_bling("BLING/JOC
 
 void mbp_bling_candy_mountain(void *data) { simple_filebased_bling("BLING/JOCO/CANDYMTN.RAW", "BLING/BLUPRPSW.RGB"); }
 
+void mbp_bling_concert_flame(void *data) { simple_filebased_bling("BLING/JOCO/CFLAME.RAW", "BLING/FLAMES.RGB"); }
+
 void mbp_bling_dancing_cyberman(void *data) { simple_filebased_bling("BLING/JOCO/CYBERMAN.RAW", "BLING/FADEGRN.RGB"); }
 
 void mbp_bling_drwho_time(void *data) { simple_filebased_bling("BLING/JOCO/DRWHOTIM.RAW", "BLING/TUNNEL.RGB");}

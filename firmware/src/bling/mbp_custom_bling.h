@@ -33,5 +33,7 @@
 #define BLING_MBP_CUSTOM_BLING_H_
 
 extern void mbp_bling_menu_custom();
+extern void mbp_bling_menu_transion();
+extern void mbp_bling_menu_joco_2018();
 
 #endif /* BLING_MBP_CUSTOM_BLING_H_ */

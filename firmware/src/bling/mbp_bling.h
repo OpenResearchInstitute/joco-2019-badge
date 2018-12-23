@@ -38,6 +38,9 @@
 extern void simple_filebased_bling(char *rawfile, char *rgbfile);
 extern void mbp_bling_backer_abraxas3d(void *data);
 extern void mbp_bling_backer_andnxor(void *data);
+extern void mbp_bling_badgers();
+extern void mbp_bling_wheaton();
+extern void mbp_bling_damon();
 extern void mbp_bling_defrag();
 extern void mbp_bling_flames(void *data);
 extern void mbp_bling_illusion();
@@ -54,7 +57,32 @@ extern void mbp_bling_scroll_cycle();
 //extern void mbp_bling_score_schedule_handler(void * p_event_data, uint16_t event_size);
 extern void mbp_bling_twitter();
 //
+extern void mbp_bling_snake();
+extern void mbp_bling_toad();
+extern void mbp_bling_trololol();
+extern void mbp_bling_twitter();
+extern void mbp_bling_meatspin();
+extern void mbp_bling_whats_up();
+//
+extern void mbp_bling_skull_crossbones();
+extern void mbp_bling_5th_element_dance();
+extern void mbp_bling_candy_mountain();
+extern void mbp_bling_concert_flame();
+extern void mbp_bling_dancing_cyberman();
+extern void mbp_bling_drwho_time();
+extern void mbp_bling_duckhunt();
+extern void mbp_bling_fallout_boygirl_drinking();
+extern void mbp_bling_fallout_boy_science();
+extern void mbp_bling_get_on_my_horse();
+extern void mbp_bling_multipass_leelo();
+extern void mbp_bling_outer_limits();
+extern void mbp_bling_portal_frying_pan();
+extern void mbp_bling_portal_wink();
+extern void mbp_bling_portals();
+extern void mbp_bling_sleestaks();
+extern void mbp_bling_tardis_nyan();
 extern void mbp_bling_twilight_zone();
+extern void mbp_bling_zombie_nyan();
 
 extern void mbp_bling_16APSK();
 extern void mbp_bling_ADA();

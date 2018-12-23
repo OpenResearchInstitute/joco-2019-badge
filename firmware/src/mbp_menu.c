@@ -409,72 +409,33 @@ static void mbp_menu_bling() {
 
 	items[menu.count++] = (menu_item_t ) { "VIPs", "MENU/VIP.ICO", "MENU/BLACK.PRV", &mbp_menu_bling_ks, NULL };
 
-        // Check for master encounter unlocks
-// 	if ((unlock & UNLOCK_MASK_MASTER_1) > 0) {
-//             items[menu.count++] = (menu_item_t ) { "FoSci", "MENU/FOSCI.ICO", "MENU/FOSCI.PRV", &mbp_bling_fallout_boy_science, NULL };
-// 	}
-// 	if ((unlock & UNLOCK_MASK_MASTER_2) > 0) {
-//             items[menu.count++] = (menu_item_t ) { "MyHorse", "MENU/MYHORSE.ICO", "MENU/MYHORSE.PRV", &mbp_bling_get_on_my_horse, NULL };
-// 	}
-// 	if ((unlock & UNLOCK_MASK_MASTER_3) > 0) {
-//             items[menu.count++] = (menu_item_t ) { "Mltipas", "MENU/MLTIPASS.ICO", "MENU/MLTIPASS.PRV", &mbp_bling_multipass_leelo, NULL };
-// 	}
-// 	if ((unlock & UNLOCK_MASK_MASTER_4) > 0) {
-//             items[menu.count++] = (menu_item_t ) { "5thEl", "MENU/5THEL.ICO", "MENU/5THEL.PRV", &mbp_bling_5th_element_dance, NULL };
-// 	}
-        // if you've unlocked all four, you get a bonus
-// 	if ((unlock & UNLOCK_MASK_ALLMASTERS) == UNLOCK_MASK_ALLMASTERS) {
-//             items[menu.count++] = (menu_item_t ) { "FoDrink", "MENU/FODRINK.ICO", "MENU/FODRINK.PRV", &mbp_bling_fallout_boygirl_drinking, NULL };
-// 	}
+/*
+	if ((unlock & UNLOCK_MASK_MASTER_1) > 0) {
+	}
+*/
 
+	items[menu.count++] = (menu_item_t ) { "Transion", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_transion, NULL };
+	items[menu.count++] = (menu_item_t ) { "Joco2018", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_joco_2018, NULL };
 	items[menu.count++] = (menu_item_t ) { "Custom", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_custom, NULL };
 
-	items[menu.count++] = (menu_item_t ) { "16APSK", "MENU/16APSK.ICO", "MENU/16APSK.PRV", &mbp_bling_16APSK, NULL };
-	items[menu.count++] = (menu_item_t ) { "AdaPi", "MENU/ADA.ICO", "MENU/ADA.PRV", &mbp_bling_ADA, NULL };
-	items[menu.count++] = (menu_item_t ) { "Anime", "MENU/ANIME.ICO", "MENU/ANIME.PRV", &mbp_bling_ANIME, NULL };
-	items[menu.count++] = (menu_item_t ) { "ARRL", "MENU/ARRL.ICO", "MENU/ARRL.PRV", &mbp_bling_ARRL, NULL };
-	items[menu.count++] = (menu_item_t ) { "CRT", "MENU/CRT1.ICO", "MENU/CRT1.PRV", &mbp_bling_CRT1, NULL };
-	items[menu.count++] = (menu_item_t ) { "Homer", "MENU/HOMER.ICO", "MENU/HOMER.PRV", &mbp_bling_HOMER, NULL };
-	items[menu.count++] = (menu_item_t ) { "Horn", "MENU/HORN.ICO", "MENU/HORN.PRV", &mbp_bling_HORN, NULL };
-	items[menu.count++] = (menu_item_t ) { "Key", "MENU/KEY.ICO", "MENU/KEY.PRV", &mbp_bling_KEY, NULL };
-	items[menu.count++] = (menu_item_t ) { "Kuhl", "MENU/KUHL.ICO", "MENU/KUHL.PRV", &mbp_bling_KUHL, NULL };
-	items[menu.count++] = (menu_item_t ) { "Mickey", "MENU/MICK.ICO", "MENU/MICK.PRV", &mbp_bling_MICK, NULL };
-	items[menu.count++] = (menu_item_t ) { "Model", "MENU/MODEL.ICO", "MENU/MODEL.PRV", &mbp_bling_MODEL, NULL };
-	items[menu.count++] = (menu_item_t ) { "Nixie", "MENU/NIXIE.ICO", "MENU/NIXIE.PRV", &mbp_bling_NIXIE, NULL };
-	items[menu.count++] = (menu_item_t ) { "Noise", "MENU/NOISE.ICO", "MENU/NOISE.PRV", &mbp_bling_NOISE, NULL };
-	items[menu.count++] = (menu_item_t ) { "Oscope", "MENU/OSCOPE.ICO", "MENU/OSCOPE.PRV", &mbp_bling_OSCOPE, NULL };
-	items[menu.count++] = (menu_item_t ) { "Pattern", "MENU/PATTERN.ICO", "MENU/PATTERN.PRV", &mbp_bling_PATTERN, NULL };
-	items[menu.count++] = (menu_item_t ) { "Prism", "MENU/PRISM.ICO", "MENU/PRISM.PRV", &mbp_bling_PRISM, NULL };
-	items[menu.count++] = (menu_item_t ) { "Radio", "MENU/RADIO.ICO", "MENU/RADIO.PRV", &mbp_bling_RADIO, NULL };
-	items[menu.count++] = (menu_item_t ) { "RKO1", "MENU/RKO1.ICO", "MENU/RKO1.PRV", &mbp_bling_RKO1, NULL };
-	items[menu.count++] = (menu_item_t ) { "RKO2", "MENU/RKO2.ICO", "MENU/RKO2.PRV", &mbp_bling_RKO2, NULL };
-	items[menu.count++] = (menu_item_t ) { "Rotate", "MENU/ROTATE.ICO", "MENU/ROTATE.PRV", &mbp_bling_ROTATE, NULL };
-	items[menu.count++] = (menu_item_t ) { "Sat1", "MENU/SAT1.ICO", "MENU/SAT1.PRV", &mbp_bling_SAT1, NULL };
-	items[menu.count++] = (menu_item_t ) { "Sat2", "MENU/SAT2.ICO", "MENU/SAT2.PRV", &mbp_bling_SAT2, NULL };
-	items[menu.count++] = (menu_item_t ) { "Sponge", "MENU/SBOB.ICO", "MENU/SBOB.PRV", &mbp_bling_SBOB, NULL };
-	items[menu.count++] = (menu_item_t ) { "SDR", "MENU/SDR.ICO", "MENU/SDR.PRV", &mbp_bling_SDR, NULL };
-	items[menu.count++] = (menu_item_t ) { "Snow", "MENU/SNOW.ICO", "MENU/SNOW.PRV", &mbp_bling_SNOW, NULL };
-	items[menu.count++] = (menu_item_t ) { "SouthP1", "MENU/SP1.ICO", "MENU/SP1.PRV", &mbp_bling_SP1, NULL };
-	items[menu.count++] = (menu_item_t ) { "SouthP2", "MENU/SP2.ICO", "MENU/SP2.PRV", &mbp_bling_SP2, NULL };
-	items[menu.count++] = (menu_item_t ) { "Spctrm1", "MENU/SPECT1.ICO", "MENU/SPECT1.PRV", &mbp_bling_SPECT1, NULL };
-	items[menu.count++] = (menu_item_t ) { "Spctrm2", "MENU/SPECT2.ICO", "MENU/SPECT2.PRV", &mbp_bling_SPECT2, NULL };
-	items[menu.count++] = (menu_item_t ) { "Spctrm3", "MENU/SP3.ICO", "MENU/SP3.PRV", &mbp_bling_SP3, NULL };
-	items[menu.count++] = (menu_item_t ) { "Tesla", "MENU/TESLA.ICO", "MENU/TESLA.PRV", &mbp_bling_TESLA, NULL };
-	items[menu.count++] = (menu_item_t ) { "Tower", "MENU/TOWER.ICO", "MENU/TOWER.PRV", &mbp_bling_TOWER, NULL };
-	items[menu.count++] = (menu_item_t ) { "Trek1", "MENU/TREK1.ICO", "MENU/TREK1.PRV", &mbp_bling_TREK1, NULL };
-	items[menu.count++] = (menu_item_t ) { "Trek2", "MENU/TREK2.ICO", "MENU/TREK2.PRV", &mbp_bling_TREK2, NULL };
-	items[menu.count++] = (menu_item_t ) { "Yagi", "MENU/YAGI.ICO", "MENU/YAGI.PRV", &mbp_bling_YAGI, NULL };
-
+	items[menu.count++] = (menu_item_t ) { "Skull", "MENU/SKLCROSgithubS.ICO", "MENU/SKLCROSS.PRV", &mbp_bling_skull_crossbones, NULL };
 	items[menu.count++] = (menu_item_t ) { "Flames", "MENU/FLAMES.ICO", "MENU/FLAMES.PRV", &mbp_bling_flames, NULL };
 	items[menu.count++] = (menu_item_t ) { "Twitter", "MENU/TWITTER.ICO", "MENU/TWITTER.PRV", &mbp_bling_twitter, NULL };
-	items[menu.count++] = (menu_item_t ) { "Matrix", "MENU/MATRIX.ICO", "MENU/MATRIX.PRV", &mbp_bling_matrix, NULL };
-	items[menu.count++] = (menu_item_t ) { "Nyan", "MENU/NYAN.ICO", "MENU/NYAN.PRV", &mbp_bling_nyan, NULL };
+	//Add whats up bling (heman)
+	if ((unlock & UNLOCK_MASK_WHATS_UP) > 0) {
+		items[menu.count++] = (menu_item_t ) { "WhatsUp", "MENU/HEYYEYA.ICO", "MENU/HEYYEYA.PRV", &mbp_bling_whats_up, NULL };
+	}
 	items[menu.count++] = (menu_item_t ) { "Scroll", "MENU/SCROLL.ICO", "MENU/BLACK.PRV", &mbp_bling_scroll_cycle, NULL };
 	items[menu.count++] = (menu_item_t ) { "Pirate", "MENU/PIRATES.ICO", "MENU/PIRATES.PRV", &mbp_bling_pirate, NULL };
 
 	//Add illusion bling
 	if ((unlock & UNLOCK_MASK_TWITTER) > 0) {
 		items[menu.count++] = (menu_item_t ) { "Illusn", "MENU/ILLUSION.ICO", "MENU/ILLUSION.PRV", &mbp_bling_illusion, NULL };
+	}
+
+	//Add matt damon bling
+	if ((unlock & UNLOCK_MASK_DAMON) > 0) {
+		items[menu.count++] = (menu_item_t ) { "Damon", "MENU/DAMON.ICO", "MENU/DAMON.PRV", &mbp_bling_damon, NULL };
 	}
 
 	//Defrag bling
