@@ -317,8 +317,8 @@ void mbp_system_name_edit() {
 
 void mbp_system_name_select() {
 	char *names[] = {
-		"Ori", "Hiram", "Percy", "Maxim", "Wouff",
-		"DeForest", "Marconi", "Zenith", "Phase4", "Extra"
+		"Monkey", "Kvothe", "GladOS", "Denna", "Nanobot",
+		"RoyGBiv", "Pris", "Bender", "Vespa", "Logan 5"
 	};
 	uint8_t name_count = 10;
 
