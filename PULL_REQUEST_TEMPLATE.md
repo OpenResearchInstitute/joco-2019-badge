@@ -1,4 +1,4 @@
-## Trans-Ionospheric Badge Pull Requests
+## JoCo 2019 Badge Pull Requests
 
 ### Thank you for taking the time to get in touch with us
 
