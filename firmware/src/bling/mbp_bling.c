@@ -997,7 +997,9 @@ void mbp_bling_defrag() {
 }
 
 // called every BACKGROUND_LED_TIME_MS
+#define EYE_CYCLE_LEN 500
 #define EYE_CYCLE_HALF 20
+
 static void __background_led_sch_handler(void * p_event_data, uint16_t event_size) {
     static int bg_cycle_count = 0;
     uint8_t eye_closed[] = { 4, 5, 6, 7 };
@@ -1026,7 +1028,8 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
             util_led_set_rgb(eye_closed[i], eye_color);
         }
     }
-    if (++bg_cycle_count > BG_TICKS_PER_SECOND/2)
+
+    if (++bg_cycle_count > EYE_CYCLE_LEN)
         bg_cycle_count = 0;
 
     util_led_show();
