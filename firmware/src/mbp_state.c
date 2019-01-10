@@ -42,6 +42,7 @@ void mbp_state_new() {
 	util_ble_name_set(m_badge_state.name);
 
 	m_badge_state.airplane_mode_enabled = SETTING_AIRPLANE_MODE_DEFAULT;
+	m_badge_state.night_mode_enabled = SETTING_NIGHT_MODE_DEFAULT;
 	m_badge_state.tilt_enabled = SETTING_TILT_ENABLED_DEFAULT;
 	m_badge_state.canary = CANARY;
 	m_badge_state.special = 0;
@@ -170,6 +171,14 @@ bool mbp_state_airplane_mode_get() {
 
 void mbp_state_airplane_mode_set(bool enabled) {
 	m_badge_state.airplane_mode_enabled = enabled;
+}
+
+bool mbp_state_night_mode_get() {
+	return m_badge_state.night_mode_enabled;
+}
+
+void mbp_state_night_mode_set(bool enabled) {
+	m_badge_state.night_mode_enabled = enabled;
 }
 
 void mbp_state_name_get(char *name) {

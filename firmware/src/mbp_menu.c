@@ -534,13 +534,13 @@ static void mbp_menu_system() {
 	menu.count = 0;
 
 	items[menu.count++] = (menu_item_t ) { "Name", "MENU/NAME.ICO", NULL, &mbp_system_name_edit, NULL };
-	items[menu.count++] = (menu_item_t ) { "Callsgn", "MENU/SETCALL.ICO", NULL, &transio_callsign_edit, NULL };
 	if (mbp_state_master_get())
 	    items[menu.count++] = (menu_item_t ) { "Special", "MENU/NAME.ICO", NULL, &mbp_system_special_edit, NULL };
 	items[menu.count++] = (menu_item_t ) { "About", "MENU/ABOUT.ICO", NULL, &mbp_system_about, NULL };
 	items[menu.count++] = (menu_item_t ) { "Shouts", "MENU/SHOUTS.ICO", NULL, &mbp_system_shouts, NULL };
 	items[menu.count++] = (menu_item_t ) { "Games", "MENU/CONTROL.ICO", NULL, &mbp_system_game_menu, NULL };
 	items[menu.count++] = (menu_item_t ) { "Plane", "MENU/AIRPLANE.ICO", NULL, &mbp_system_airplane_mode_select, NULL };
+	items[menu.count++] = (menu_item_t ) { "Night", "MENU/NIGHT.ICO", NULL, &mbp_system_night_mode_select, NULL };
 	items[menu.count++] = (menu_item_t ) { "Test", "MENU/TEST.ICO", NULL, &mbp_system_test, NULL };
 	items[menu.count++] = (menu_item_t ) { "Tilt", "MENU/TILT.ICO", NULL, &mbp_system_tilt_mode_select, NULL };
 	items[menu.count++] = (menu_item_t ) { "Bugs", "MENU/ANT.ICO", NULL, &mbp_system_bugreports, NULL };

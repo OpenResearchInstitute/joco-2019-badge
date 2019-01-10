@@ -66,6 +66,18 @@ void mbp_system_airplane_mode_select() {
 	}
 }
 
+void mbp_system_night_mode_select() {
+	if (mbp_state_night_mode_get()) {
+		bool enabled = mbp_ui_toggle_popup("Night Mode", 0, "Enable", "Disable", "Currently: ENABLED") == 0;
+		mbp_state_night_mode_set(enabled);
+		mbp_state_save();
+	} else {
+		bool enabled = mbp_ui_toggle_popup("Night Mode", 1, "Enable", "Disable", "Currently: DISABLED") == 0;
+		mbp_state_night_mode_set(enabled);
+		mbp_state_save();
+	}
+}
+
 void mbp_system_code() {
 	char code[9];
 	memset(code, 0, 9);
@@ -366,6 +378,7 @@ void mbp_system_shouts() {
 			"@ANDnXOR\n"
 			"Partners\n"
 			"ORI badge team\n"
+			"JoCo\n"
 			"#badgelife\n"
 			"... and you!\n");
 }

@@ -36,6 +36,7 @@ typedef struct {
 	uint8_t canary;
 	char name[SETTING_NAME_LENGTH];
 	bool airplane_mode_enabled;
+	bool night_mode_enabled;
 	bool tilt_enabled;
 	bool game_exit_pop_up;
 	bool game_led_sound;
@@ -81,6 +82,10 @@ extern void mbp_state_game_incoming_ok_set(bool b);
 //Get and set the airplane mode setting
 extern bool mbp_state_airplane_mode_get();
 extern void mbp_state_airplane_mode_set(bool enabled);
+
+//Get and set the night mode setting
+extern bool mbp_state_night_mode_get();
+extern void mbp_state_night_mode_set(bool enabled);
 
 extern uint16_t mbp_state_chip8_fg_color_get();
 extern void mbp_state_chip8_fg_color_set(uint16_t c);

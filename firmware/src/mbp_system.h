@@ -33,12 +33,10 @@
 
 //uncomment this to hide secret features
 //#define OPSEC				1
-//uncomment this for red badges
-//TODO: This should be a file check like APA102
-//#define RED_BADGE			1
 
 extern void mbp_system_about();
 extern void mbp_system_airplane_mode_select();
+extern void mbp_system_night_mode_select();
 extern void mbp_system_code();
 //extern bool mbp_system_interuptable_get();
 //extern void mbp_system_interuptable_set(bool interuptable);

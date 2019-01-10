@@ -22,6 +22,7 @@
  * 	@andrewnriley
  * 	@lacosteaef
  * 	@bitstr3m
+ *      @sconklin
  *****************************************************************************/
 
 /**
@@ -36,13 +37,12 @@
 
 #include "system.h"
 
-uint8_t brightness = 20;
+#define NORMAL_BRIGHTNESS 20
+#define NIGHT_BRIGHTNESS 3
 
-#ifdef RED_BADGE
-#define LED_PIN_DATA			10
-#else
+uint8_t brightness = NORMAL_BRIGHTNESS;
+
 #define LED_PIN_DATA			2
-#endif
 
 #define LED_PIN_SCK_DUMMY		29
 
@@ -66,17 +66,6 @@ bool ws2812b_init() {
 	uint32_t err_code = nrf_drv_spi_init(&spi2, &spi_config, NULL);
 	APP_ERROR_CHECK(err_code);
 
-
-	//Read the LED file for brightness
-	FIL led_file;
-	FRESULT result = f_open(&led_file, "LED.MBP", FA_READ | FA_OPEN_EXISTING);
-	if (result == FR_OK) {
-		UINT count = 0;
-		char b_str[4];
-		f_read(&led_file, b_str, 3, &count);
-		brightness = strtol(b_str, NULL, 10);
-	}
-
 	return err_code == NRF_SUCCESS;
 }
 
@@ -85,6 +74,12 @@ void ws2812b_send(uint8_t *leds) {
 	int16_t buffer_size = (LED_COUNT * 4 * 3);	//2 bytes per bit, reset latch is 6 bytes
 	uint8_t buffer[buffer_size];
 	uint8_t rx;
+
+	if (mbp_state_night_mode_get()) {
+	        brightness = NIGHT_BRIGHTNESS;
+	} else {
+		brightness = NORMAL_BRIGHTNESS;
+	}
 
 	//Zero the buffer
 	memset(buffer, 0x00, buffer_size);
