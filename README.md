@@ -38,7 +38,7 @@ If you plan to hook up hardware for programming and debugging, you'll need the S
 
 `sudo dpkg -i <path-to-downloads>/JLink_Linux_V618b_x86_64.deb`
 
-You'll also need a couple of command line tools from Nordic. These are available from <http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.tools/dita/tools/nrf5x_command_line_tools/nrf5x_installation.html?cp=5_1_1>. We used version 9.7.0, but the latest version is probably fine. Install them in a location outside this project, like the Nordic SDK. For example using the location "/src/joco-support", you can do the following:
+You'll also need a couple of command line tools from Nordic. These are available from <https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF5-Command-Line-Tools/Download> (change the platform on the left-hand side to Linux64). We used version 9.7.0, but the latest version is probably fine. Install them in a location outside this project, like the Nordic SDK. For example using the location "/src/joco-support", you can do the following:
 
 ```
 mkdir -p /src/joco-support/bin
