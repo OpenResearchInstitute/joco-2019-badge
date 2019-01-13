@@ -66,7 +66,7 @@ The command line tools nrfjprog and mergehex are not currently available for ARM
 
 ### Build the code
 
-`cd firmware/manbearpig`
+`cd firmware/src`
 
 `make`
 
@@ -96,7 +96,7 @@ Two ways, either:
 
 or
 
-`cd firmware/manbearpig`
+`cd firmware/src`
 
 `make flash_softdevice`
 
