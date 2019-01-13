@@ -82,9 +82,12 @@ The one that was used by the development team is the Segger [J-Link EDU Mini](ht
 
 It's much easier to connect to the board if you use a short flat cable and a mating header on the board end. All these can be purchased from these retailers:
 
-* [J-Link EDU Min from Adafruit](https://www.adafruit.com/product/3571)
-* [Ten pin JTAG cable from Adafruit](https://www.adafruit.com/product/1675) (not the same as the one that comes with the debugger)
+* [J-Link EDU Mini from Adafruit](https://www.adafruit.com/product/3571) (this comes with a 10-pin 2x5 cable)
 * [Header from Mouser](https://www.mouser.com/ProductDetail/Harwin/M50-3500542?qs=9fQaSFfsqsyXI0P9tFOVoQ%3D%3D)
+
+Pin 1 on the J-Link EDU Mini is labeled with a (1) icon. Plug in the red edge of the ribbon cable that comes with the J-Link to this pin.
+
+On the badge, look for the row of 10 holes in a 2x5 arrangement to the right of the RIGADO bluetooth chip on the top right. Pin 1 is *not* labeled, but is the square pad on the top left. Plug the 2x5 header into these holes, then plug in the red edge of the cable so Pin 1 is the top left of the header (which is plugged in to the square pad).
 
 ### Flashing the target
 
