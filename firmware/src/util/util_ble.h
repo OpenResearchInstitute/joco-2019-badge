@@ -71,7 +71,6 @@ extern void util_ble_advertising_start();
 extern void util_ble_score_update();
 extern uint32_t util_ble_connect(ble_gap_addr_t *p_address);
 extern uint32_t util_ble_disconnect();
-extern void util_ble_c2_set(master_c2_t *p_c2);
 extern void util_ble_init();
 extern void util_ble_name_get(char *name);
 extern void util_ble_name_set(char *name);
