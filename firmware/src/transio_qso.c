@@ -18,7 +18,7 @@
  *****************************************************************************/
 
 #include "system.h"
-
+#if INCLUDE_QSO
 #define QSO_SVC_UUID			0xf264
 #define	QSO_CHAR_CALLSIGN_UUID	0xc91d	// read the badge's callsign
 
@@ -438,3 +438,4 @@ void transio_callsign_edit() {
 	}
 
 }
+#endif //#if INCLUDE_QSO

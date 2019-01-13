@@ -28,8 +28,12 @@
 // The rest of the flags are identical to flags in advertisements.
 #define NLFLAGS_UPDATE_MASK		0x3F	// all the non-local flags
 #define NLFLAGS_GAMES_ACCEPTED	BLE_DATA_FLAGS_MASK_GAMES
+#if INCLUDE_QSO
 #define NLFLAGS_QSO_GAME		BLE_DATA_FLAGS_MASK_QSO
+#endif
+#if INCLUDE_MM
 #define NLFLAGS_MM_GAME			BLE_DATA_FLAGS_MASK_MM
+#endif
 
 #define NLFLAGS_DEFAULT	(NLFLAGS_VALID)	// start with these flags for new entries
 
@@ -343,6 +347,7 @@ void ble_lists_process_advertisement(uint8_t *ble_address,
 }
 
 
+#if INCLUDE_QSO
 // Determine whether a selected neighbor plays the QSO game
 bool neighbor_allows_qso_game(uint8_t index) {
 	ble_lists_neighborlist_t neighbor = neighbor_list[sorted_index[index]];
@@ -354,7 +359,7 @@ bool neighbor_allows_qso_game(uint8_t index) {
 		return false;
 	}
 }
-
+#endif
 
 // Generate a text report about a selected neighbor.
 // Returns number of characters added to buf.

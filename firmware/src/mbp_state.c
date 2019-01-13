@@ -52,9 +52,16 @@ void mbp_state_new() {
 	m_badge_state.chip8_bg_color = SETTING_CHIP8_BG_COLOR_DEFAULT;
 	m_badge_state.unlock_state = SETTING_UNLOCK_DEFAULT;
 	m_badge_state.master_badge = SETTING_MASTER_DEFAULT;
-	m_badge_state.joco_score = GAME_SCORE_DEFAULT;
+	m_badge_state.game_score = GAME_SCORE_DEFAULT;
+#if INCLUDE_QSO
 	m_badge_state.qso_count = 0;
+#endif
+#if INCLUDE_MM
 	m_badge_state.mm_count = 0;
+#endif
+#if INCLUDE_CAPTURE
+	m_badge_state.capture_count = 0;
+#endif
 	m_badge_state.game_incoming_ok = SETTING_GAME_INCOMING_OK_DEFAULT;
 
 	strcpy(m_badge_state.pw_riley, "part97");	// Hacker is expected to guess this one.
@@ -67,8 +74,10 @@ void mbp_state_new() {
 	strcpy(m_badge_state.wall_messages[4], "Msg 5 None");
 	m_badge_state.wall_current_spot = 0;
 
+#if INCLUDE_QSO
 	strcpy(m_badge_state.callsign, "N0CALL");
 	m_badge_state.callsign_set = false;
+#endif
 }
 
 bool mbp_state_load() {
@@ -118,9 +127,11 @@ bool mbp_state_load() {
 		util_ble_score_update();
 		score_ble_score_update();
 		util_ble_flags_set();
+#if INCLUDE_QSO
 		if (m_badge_state.callsign_set) {
 			transio_qso_callsign_set(m_badge_state.callsign);
 		}
+#endif
 		return true;
 	}
 
@@ -267,15 +278,16 @@ void mbp_state_unlock_set(uint16_t unlock_state) {
 }
 
 uint16_t mbp_state_score_get() {
-	return m_badge_state.joco_score;
+	return m_badge_state.game_score;
 }
 
 void mbp_state_score_set(uint16_t score_state) {
-	m_badge_state.joco_score = score_state;
+	m_badge_state.game_score = score_state;
 	util_ble_score_update();
 	score_ble_score_update();
 }
 
+#if INCLUDE_QSO
 uint16_t mbp_state_qso_count_get() {
 	return m_badge_state.qso_count;
 }
@@ -283,7 +295,9 @@ uint16_t mbp_state_qso_count_get() {
 void mbp_state_qso_count_increment() {
 	m_badge_state.qso_count++;
 }
+#endif
 
+#if INCLUDE_MM
 uint16_t mbp_state_mm_count_get() {
 	return m_badge_state.mm_count;
 }
@@ -291,6 +305,17 @@ uint16_t mbp_state_mm_count_get() {
 void mbp_state_mm_count_increment() {
 	m_badge_state.mm_count++;
 }
+#endif
+
+#if INCLUDE_CAPTURE
+uint16_t mbp_state_capture_count_get() {
+	return m_badge_state.capture_count;
+}
+
+void mbp_state_capture_count_increment() {
+	m_badge_state.capture_count++;
+}
+#endif
 
 uint8_t mbp_state_special_get() {
 	return m_badge_state.special;
@@ -317,6 +342,7 @@ void mbp_state_pw_root_get(char *pw) {
 	snprintf(pw, SETTING_PW_LENGTH, "%s", m_badge_state.pw_root);
 }
 
+#if INCLUDE_QSO
 void mbp_state_callsign_set(char *call) {
 	snprintf(m_badge_state.callsign, SETTING_CALLSIGN_LENGTH, "%s", call);
 	if (call[0] != '\0') {
@@ -334,6 +360,7 @@ bool mbp_state_callsign_get(char *call) {
 	}
 	return m_badge_state.callsign_set;
 }
+#endif
 
 void mbp_state_wall_show(){
 	/*todo v0.8 Polish

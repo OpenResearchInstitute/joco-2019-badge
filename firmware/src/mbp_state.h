@@ -41,21 +41,28 @@ typedef struct {
 	bool game_exit_pop_up;
 	bool game_led_sound;
 	bool game_incoming_ok;
-	uint8_t joco_last_level_dispensed;
+	//uint8_t joco_last_level_dispensed;
 	uint8_t special;
 	uint16_t chip8_fg_color;
 	uint16_t chip8_bg_color;
-	uint16_t joco_score;
+	uint16_t game_score;
 	uint16_t unlock_state;
 	bool master_badge;
 	char pw_riley[9];
 	char pw_root[9];
 	uint16_t wall_current_spot;
 	char wall_messages[5][16];
+#if INCLUDE_QSO
 	char callsign[7];
 	bool callsign_set;
 	uint16_t qso_count;
+#endif
+#if INCLUDE_MM
 	uint16_t mm_count;
+#endif
+#if INCLUDE_CAPTURE
+	uint16_t capture_count;
+#endif
 } badge_state_t;
 
 extern void mbp_state_wall_show();
@@ -100,17 +107,27 @@ extern void mbp_state_master_set(bool master);
 extern bool mbp_state_tilt_get();
 extern void mbp_state_tilt_set(bool tilt_state);
 
-//Get and set joco score
+//Get and set game score
 extern uint16_t mbp_state_score_get();
 extern void mbp_state_score_set(uint16_t score_state);
 
+#if INCLUDE_QSO
 //Get and increment count of QSOs completed
 extern uint16_t mbp_state_qso_count_get();
 extern void mbp_state_qso_count_increment();
+#endif
 
+#if INCLUDE_CAPTURE
+//Get and increment capture stats
+extern uint16_t mbp_state_capture_count_get();
+extern void mbp_state_capture_count_increment();
+#endif
+
+#if INCLUDE_MM
 //Get and increment count of Mastermind puzzles solved
 extern uint16_t mbp_state_mm_count_get();
 extern void mbp_state_mm_count_increment();
+#endif
 
 //Get and set joco special badge ID
 extern uint8_t mbp_state_special_get();

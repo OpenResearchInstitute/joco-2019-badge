@@ -31,6 +31,11 @@
 #define SYSTEM_H_
 #define VERSION_SD						30
 
+// Various build options
+#define INCLUDE_CAPTURE true // do we include the capture game?
+#define INCLUDE_QSO true // Do we include the QSO logging game?
+#define INCLUDE_MM  true// Do we include the mastermind game?
+
 // Various testing options
 
 //#define NO_DB_SAVE 1
@@ -134,7 +139,7 @@
 //Libraries
 #include "gfxfont.h"
 
-//JOCO
+//FIRMWARE
 #include "beacon_ble.h"
 #include "chip8.h"
 #include "drv_apa102.h"
@@ -143,7 +148,10 @@
 #include "bling/mbp_bling.h"
 #include "bling/mbp_custom_bling.h"
 #include "gamefile.h"
-#include "joco_gameplay.h"
+#if INCLUDE_CAPTURE
+#include "capture_game.h"
+#endif
+#include "gameplay.h"
 #include "joco_db.h"
 #include "score_ble.h"
 #include "mastermind.h"
@@ -158,8 +166,10 @@
 #include "ntopt.h"
 #include "partcl/tcl.h"
 #include "skifree.h"
+#if INCLUDE_QSO
 #include "transio_log.h"
 #include "transio_qso.h"
+#endif
 #include "util.h"
 #include "util_ble.h"
 #include "util_ble_lists.h"

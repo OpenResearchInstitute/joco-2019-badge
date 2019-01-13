@@ -101,7 +101,7 @@ SRC_FILES += \
 	drv_ws2812b.c \
 	gamefile.c \
 	joco_db.c \
-	joco_gameplay.c \
+	gameplay.c \
 	main.c \
 	mastermind.c \
 	mbp_menu.c \

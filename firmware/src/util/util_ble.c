@@ -160,7 +160,9 @@ static void __ble_evt_dispatch(ble_evt_t * p_ble_evt) {
 	ble_conn_params_on_ble_evt(p_ble_evt);
 	//mbp_master_ble_on_ble_evt(p_ble_evt);
 	//!!!    score_ble_on_ble_evt(p_ble_evt);
+#if INCLUDE_QSO
 	transio_qso_on_ble_evt(p_ble_evt);
+#endif
 	nrf_ble_gatt_on_ble_evt(&m_gatt, p_ble_evt);
 	ble_nus_on_ble_evt(&m_nus, p_ble_evt);
 	__on_ble_evt(p_ble_evt);
@@ -219,7 +221,9 @@ static void __conn_params_init(void) {
 
 static void __db_discovery_handler(ble_db_discovery_evt_t * p_evt) {
 	//mbp_master_ble_on_db_disc_evt(p_evt);
+#if INCLUDE_QSO
 	transio_qso_on_db_disc_evt(p_evt);
+#endif
 }
 
 /**
@@ -556,7 +560,9 @@ static void __pm_init() {
 }
 
 static void __services_init() {
+#if INCLUDE_QSO
 	transio_qso_ble_init();
+#endif
 
 	//Init NUS
 	ble_nus_init_t nus_init;
@@ -894,17 +900,29 @@ void util_ble_name_set(char *name) {
 
 void util_ble_flags_set(void) {
 	uint8_t flags = 0;
+	uint8_t flag_tmp;
 	ble_gap_conn_sec_mode_t sec_mode;
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
 	if (mbp_state_game_incoming_ok_get()) {
+#if INCLUDE_QSO
 		flags |= BLE_DATA_FLAGS_MASK_GAMES;
 		if (mbp_state_callsign_get(NULL)) {
 			flags |= BLE_DATA_FLAGS_MASK_QSO;
 		}
+#endif
+#if INCLUDE_MM
 		flags |= BLE_DATA_FLAGS_MASK_MM;
+#endif
 	} else {
-		flags &= !(BLE_DATA_FLAGS_MASK_GAMES | BLE_DATA_FLAGS_MASK_QSO | BLE_DATA_FLAGS_MASK_MM);
+		flag_tmp = BLE_DATA_FLAGS_MASK_GAMES;
+#if INCLUDE_QSO
+		flag_tmp |= BLE_DATA_FLAGS_MASK_QSO;
+#endif
+#if INCLUDE_MM
+		flag_tmp |= BLE_DATA_FLAGS_MASK_MM;
+#endif
+		flags &= !(flag_tmp);
 	}
 
 	//Copy flags byte into advertisement

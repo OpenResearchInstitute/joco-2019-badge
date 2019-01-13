@@ -121,11 +121,11 @@ void mbp_system_code() {
 		mbp_state_save();
 		mbp_ui_popup("Unlocked", "Defrag Bling unlocked.");
 	}
-
+#if INCLUDE_MM
 	else if (strcmp(code, "CHEAT") == 0) {
 		cheat_at_mastermind = true;		// not saved!
 	}
-
+#endif
 	//Everything else
 	else {
 		mbp_ui_error(":(");
@@ -192,10 +192,15 @@ void mbp_system_game_menu() {
 			{ "Background Color", NULL, NULL, NULL, NULL },
 			{ "LED Beep Toggle", NULL, NULL, NULL, NULL },
 			{ "Accept Incoming", NULL, NULL, NULL, NULL },
+#if INCLUDE_QSO
 			{ "Clear QSO Log", NULL, NULL, NULL, NULL },
+#endif
 	};
 	menu_t menu;
-	menu.count = 6;
+	menu.count = 5;
+#if INCLUDE_QSO
+	menu.count++;
+#endif
 	menu.items = items;
 	menu.selected = 0;
 	menu.title = "Game CFG";
@@ -253,7 +258,7 @@ void mbp_system_game_menu() {
 			mbp_state_save();
 		}
 		break;
-
+#if INCLUDE_QSO
 	case 5:
 		if (mbp_ui_toggle_popup("Erase Log", 1, "Erase", "Cancel", "Do you want to erase the entire QSO log? Really?") == 0) {
 			if (f_unlink(LOG_FILENAME) != FR_OK) {
@@ -261,7 +266,7 @@ void mbp_system_game_menu() {
 			}
 		}
 		break;
-
+#endif
 	}
 
 }

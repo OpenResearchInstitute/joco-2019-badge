@@ -18,6 +18,8 @@
  *****************************************************************************/
 #include "system.h"
 
+#if INCLUDE_MM
+
 #define MM_NUM_COLUMNS	4
 #define	MM_NUM_COLORS	6
 #define MM_NO_COLOR		(MM_NUM_COLORS)
@@ -1053,3 +1055,4 @@ void mastermind_rsvp(void) {
 
 	//!!! TODO
 }
+#endif // #if INCLUDE_MM

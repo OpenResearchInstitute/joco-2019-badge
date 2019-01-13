@@ -20,8 +20,8 @@
 
 #include "system.h"
 
-#define JOCO_UI_MARGIN         3
-#define JOCO_UI_MARGIN_RIGHT  12
+#define GAMEPLAY_UI_MARGIN         3
+#define GAMEPLAY_UI_MARGIN_RIGHT  12
 
 
 int8_t gamelevel() {
@@ -51,46 +51,61 @@ void game_status_screen() {
 
     while (1) {
 	if (redraw || !util_gfx_is_valid_state()) {
+#if INCLUDE_QSO
 	    uint16_t qso_count = mbp_state_qso_count_get();
-		uint16_t mm_count = mbp_state_mm_count_get();
+#endif
+#if INCLUDE_MM
+	    uint16_t mm_count = mbp_state_mm_count_get();
+#endif
+#if INCLUDE_CAPTURE
+	    uint16_t capture_count = mbp_state_capture_count_get();
+#endif
 
 	    //Make sure there's no clipping
 	    util_gfx_cursor_area_reset();
 
 	    //Draw background
 	    mbp_ui_cls();
-	    //util_gfx_draw_raw_file("MENU/SCOREBG.RAW", 0, 0, 128, 128, NULL, false, NULL);
 
 	    //Print their name
 	    util_gfx_set_font(FONT_LARGE);
 	    util_gfx_set_color(COLOR_WHITE);
-	    util_gfx_set_cursor(0, JOCO_UI_MARGIN);
+	    util_gfx_set_cursor(0, GAMEPLAY_UI_MARGIN);
 	    mbp_state_name_get(temp);
 	    util_gfx_print(temp);
 
 	    util_gfx_set_color(COLOR_LIGHTBLUE);
 	    strcpy(temp, "GAME STATS");
-	    util_gfx_set_cursor(JOCO_UI_MARGIN, 26);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 26);
 	    util_gfx_print(temp);
 
+#if INCLUDE_CAPTURE
+	    //Print their capture count
+	    util_gfx_set_color(COLOR_YELLOW);
+	    sprintf(temp, "Captured: %u", capture_count);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 60);
+	    util_gfx_print(temp);
+#endif
+#if INCLUDE_QSO
 	    //Print their QSO count
 	    util_gfx_set_color(COLOR_YELLOW);
 	    sprintf(temp, "QSOs %u", qso_count);
-	    util_gfx_set_cursor(JOCO_UI_MARGIN, 60);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 60);
 	    util_gfx_print(temp);
-
-		//Print the number of Mastermind puzzles solved
-		sprintf(temp, "Codes %u", mm_count);
-		util_gfx_set_cursor(JOCO_UI_MARGIN, 75);
-		util_gfx_print(temp);
-
+#endif
+#if INCLUDE_MM
+	    //Print the number of Mastermind puzzles solved
+	    sprintf(temp, "Codes %u", mm_count);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 75);
+	    util_gfx_print(temp);
+#endif
 	    //Print points
 	    util_gfx_set_color(COLOR_RED);
-	    util_gfx_set_cursor(JOCO_UI_MARGIN, 95);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 95);
 	    util_gfx_print("Points:");
 
 		sprintf(temp, "    %u", mbp_state_score_get());
-		util_gfx_set_cursor(JOCO_UI_MARGIN, 110);
+		util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 110);
 		util_gfx_print(temp);
 
 		redraw = false;

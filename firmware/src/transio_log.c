@@ -19,6 +19,8 @@
 
 #include "system.h"
 
+#if INCLUDE_QSO
+
 #define UI_MARGIN	3
 #define SCREEN_WIDTH	20	// characters of small font
 #define SCREEN_LINES	9	// rows of small font
@@ -238,3 +240,4 @@ void logfile_add_record(char *record) {
 		mbp_ui_error("Could not close logfile.");
 	}
 }
+#endif // #if INCLUDE_QSO

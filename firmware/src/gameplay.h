@@ -17,13 +17,13 @@
  * 	@mustbeart
  * 	@abraxas3d
  *****************************************************************************/
-#ifndef JOCO_GAMEPLAY_H_
-#define JOCO_GAMEPLAY_H_
+#ifndef GAMEPLAY_H_
+#define GAMEPLAY_H_
 
 // Start a new badge with these
 #define GAME_SCORE_DEFAULT 0
 
-// Gameplay definitions
+// Gameplay definitions -spc- remove levels
 #define POINTS_PER_LEVEL 250
 // Max points must be less than 32768 because we use the high bit to indicate trinkets should be dispensed
 #define MAX_POINTS 24750 // 32768 MAX
@@ -49,14 +49,8 @@
 // game play points parameters
 #define GAME_TIME_4_SCORE 60000 // play a game for a minute to score
 
-// 'master' badge definitions
-#define MASTER_1_SPECIAL_ID 1
-#define MASTER_2_SPECIAL_ID 2
-#define MASTER_3_SPECIAL_ID 3
-#define MASTER_4_SPECIAL_ID 4
-
 extern int8_t gamelevel();
 extern void add_to_score(int16_t points, char *name);
 extern void game_status_screen();
 
-#endif /* JOCO_GAMEPLAY_H_ */
+#endif /* GAMEPLAY_H_ */

@@ -45,9 +45,12 @@
 
 // Flag values for the byte at BLE_DATA_INDEX_DC26_FLAGS:
 #define BLE_DATA_FLAGS_MASK_GAMES     0x01              // 1 if we accept incoming games
+#if INCLUDE_QSO
 #define BLE_DATA_FLAGS_MASK_QSO       0x02              // 1 if we play the QSO game
+#endif
+#if INCLUDE_MM
 #define BLE_DATA_FLAGS_MASK_MM        0x04              // 1 if we play Mastermind
-
+#endif
 
 #define COMPANY_ID_TRANSIO_TMP				0x0858	// Fake ID used at Hamvention 2018
 #define COMPANY_ID_TRANSIO					0x064A	// Open Research Institute, Inc

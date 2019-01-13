@@ -457,14 +457,19 @@ static void mbp_menu_bling() {
 
 static void mbp_menu_games() {
 	menu_item_t items[] = {
+#if INCLUDE_MM
 			{ "Mastermind", NULL, NULL, &mastermind, NULL },
+#endif
 			{ "Ski Free", NULL, NULL, &ski, NULL },
 			{ "CHIP-8", NULL, NULL, &chip8_menu, NULL },
 	};
 
 	menu_t menu;
 	menu.items = items;
-	menu.count = 3;
+	menu.count = 2;
+#if INCLUDE_MM
+	menu.count++;
+#endif
 	menu.selected = 0;
 	menu.title = "Games";
 	menu.top = 0;
@@ -484,7 +489,7 @@ static void __nearby_callback(uint8_t index) {
 //		buf_p += transio_qso_get_info(index, callsign, buf_p);
 //	}
 //
-
+#if INCLUDE_QSO
 	if (neighbor_allows_qso_game(index)) {
 		uint8_t choice = mbp_ui_toggle_popup(name, 0, "QSO", "Cancel", combined_info);
 
@@ -495,6 +500,7 @@ static void __nearby_callback(uint8_t index) {
 	} else {
 		mbp_ui_popup(name, combined_info);
 	}
+#endif
 }
 
 
@@ -554,10 +560,12 @@ static void mbp_menu_system() {
 
 void mbp_menu_main() {
 	menu_t menu;
-	menu_item_t items[10];
+	menu_item_t items[10]; // leave room for all optionally built things
 	menu.count = 0;
 	items[menu.count++] = (menu_item_t ) { "Bling!", "MENU/BLING.ICO", NULL, &mbp_menu_bling, NULL };
+#if INCLUDE_QSO
 	items[menu.count++] = (menu_item_t ) { "ViewLog", "MENU/VIEWLOG.ICO", NULL, &transio_log_screen, NULL };
+#endif
 	items[menu.count++] = (menu_item_t ) { "Nearby", "MENU/HOMES.ICO", NULL, &mbp_menu_nearby, NULL };
 	items[menu.count++] = (menu_item_t ) { "Score", "MENU/SCORE.ICO", NULL, &game_status_screen, NULL };
 	items[menu.count++] = (menu_item_t ) { "Games", "MENU/CONTROL.ICO", NULL, &mbp_menu_games, NULL };
