@@ -91,7 +91,9 @@ On the badge, look for the row of 10 holes in a 2x5 arrangement to the right of 
 
 ### Flashing the target
 
-Two ways, either:
+Make sure the badge is powered on (ensure three AA batteries are inserted, then turn on the switch on the bottom left) before flashing the target.
+
+After powering on the badge, there are two ways to flash. Either:
 
 `cd firmware`
 
@@ -106,6 +108,16 @@ or
 `make flash`
 
 The `make flash_softdevice` can be omitted after the first time.
+
+### Updating the Micro SD card
+
+The directory `SD Image` contains files which should be on the Micro SD card plugged in next to the screen.
+
+Unplug the SD card from the badge, attach to a Micro SD card adapter, insert into an SD card reader, connect to a computer, then sync over the contents. For example:
+
+```
+rsync -rav SD\\\ Image/ /path/to/mounts/NO\ NAME
+```
 
 ### Setting up the Segger Ozone debugger
 
