@@ -35,6 +35,7 @@
 #define INCLUDE_CAPTURE true // do we include the capture game?
 #define INCLUDE_QSO true // Do we include the QSO logging game?
 #define INCLUDE_MM  true// Do we include the mastermind game?
+#define USE_ADVERTISING_FLAGS true // These are game flags used by Joco and T-I badges
 
 // Various testing options
 

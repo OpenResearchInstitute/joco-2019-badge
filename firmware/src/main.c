@@ -149,6 +149,10 @@ int main(void) {
 		util_ble_on();
 	}
 
+
+#if INCLUDE_CAPTURE
+	capture_init();
+#endif
 	//Startup game
 	// TBD
 //!!!	score_ble_init();	with this off, we don't run the score/command services on BLE

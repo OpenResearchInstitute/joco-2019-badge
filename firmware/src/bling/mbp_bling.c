@@ -841,7 +841,7 @@ void mbp_bling_scroll_cycle() {
     UTIL_LED_ANIM_INIT(anim);
     util_led_load_rgb_file("BLING/KIT.RGB", &anim);
 
-    //Get the usesrname
+    //Get the username
     char name[SETTING_NAME_LENGTH];
     mbp_state_name_get(name);
 

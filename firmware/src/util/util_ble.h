@@ -55,7 +55,7 @@
 #define COMPANY_ID_TRANSIO_TMP				0x0858	// Fake ID used at Hamvention 2018
 #define COMPANY_ID_TRANSIO					0x064A	// Open Research Institute, Inc
 #define COMPANY_ID_ANDNXOR					0x049E	// assigned to AND!XOR LLC :-)
-#define COMPANY_ID_JOCO						0x0B25	// Fake ID used for JoCo 2018
+#define COMPANY_ID_JOCO						0x0B25	// Fake ID used for JoCo 2018 and 2019
 #define COMPANY_ID_CPV						0x0C97	// Fake; Crypto Privacy Village
 #define COMPANY_ID_DC503					0x0503	// assigned to Locoroll, Inc
 #define COMPANY_ID_DC801					0x0801	// Fake, DC801??
@@ -69,6 +69,11 @@
 
 #define APPEARANCE_ID_ANDNXOR_DC25				0x19DC
 #define APPEARANCE_ID_STANDARD_DC26				0x26DC
+#define APPEARANCE_ID_CREATURE                                  0xCC19
+
+// This sets the appearance to one of the above
+#define BADGE_APPEARANCE APPEARANCE_ID_STANDARD_DC26
+
 
 extern void util_ble_advertising_start();
 extern void util_ble_score_update();
@@ -77,6 +82,7 @@ extern uint32_t util_ble_disconnect();
 extern void util_ble_init();
 extern void util_ble_name_get(char *name);
 extern void util_ble_name_set(char *name);
+extern void util_ble_appearance_set(uint16_t appearance);
 extern void util_ble_flags_set(void);
 extern uint32_t util_ble_nus_send(char *p_string, uint16_t length);
 extern void util_ble_off();

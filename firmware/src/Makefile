@@ -95,6 +95,7 @@ SRC_FILES += \
 	util/util_sd.c \
 	util/util_tilt.c \
 	beacon_ble.c \
+	capture_game.c \
 	chip8.c \
 	drv_apa102.c \
 	drv_st7735.c \

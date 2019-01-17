@@ -35,6 +35,18 @@
 // receiving and display parameters
 #define CAPTURE_DISPLAY_TIME_LENGTH 60 // Seconds
 
-extern void capture_something(int16_t points, char *name);
+// Initialize anything
+extern void capture_init(void);
+extern bool capture_is_sending(void);
+
+
+// handle hearing a creature advertisement
+extern void capture_process_heard(char *name);
+
+// handle starting a cycle of sending creature advertisements
+extern void capture_send_creature(char *name);
+
+// handle cleaning up after a cycle of sending creature advertisements
+extern void capture_stop_send_creature();
 
 #endif /* CAPTURE_GAME_H_ */

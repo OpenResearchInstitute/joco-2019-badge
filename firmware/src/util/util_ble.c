@@ -338,7 +338,10 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 	// appearance values. (DEFCON standard, not BLE standard!)
 
 	if (badge.appearance == APPEARANCE_ID_ANDNXOR_DC25 ||
-		badge.appearance == APPEARANCE_ID_STANDARD_DC26) {
+#if ENABLE_CAPTURE
+	        badge.appearance == APPEARANCE_ID_CREATURE ||
+#endif
+	        badge.appearance == APPEARANCE_ID_STANDARD_DC26) {
 
 		// Some badges may choose to omit the BLE-standard name field, or
 		// send only a partial name in the advertisement.
@@ -350,6 +353,17 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 			strncpy(badge.name, util_ble_company_id_to_string(badge.company_id), SETTING_NAME_LENGTH);
 		}
 
+#if USE_ADVERTISING_FLAGS
+		// Extract the flags byte from Trans-Ionospheric badges
+		if (badge.appearance == APPEARANCE_ID_STANDARD_DC26) {
+			badge.flags = mfg_specific_data[BLE_DATA_INDEX_DC26_FLAGS];
+		} else {
+			badge.flags = 0x00;
+		}
+#else
+		badge.flags = 0x00;
+
+#endif
 		// Badge ID seemed to be a big deal for DC25, but not DC26.
 		// Fill it in just in case we need it.
 		if (badge.appearance == APPEARANCE_ID_ANDNXOR_DC25) {
@@ -379,16 +393,16 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 					// Synthesize a fake device_id from the GAP address
 					badge.device_id = p_report->peer_addr.addr[1] << 8 | p_report->peer_addr.addr[0];
 					break;
+#if INCLUDE_CAPTURE
 			}
+		} else if (badge.appearance == APPEARANCE_ID_CREATURE) {
+				// We've received an indication that there's a 'creature' in the area that can be captured.
+				// All we care about is the creature I(index), which is encoded in the name field
+				capture_process_heard(badge.name);
 		}
-
-		// Extract the flags byte from Trans-Ionospheric badges
-		if (badge.appearance == APPEARANCE_ID_STANDARD_DC26 &&
-			badge.company_id == COMPANY_ID_TRANSIO) {
-			badge.flags = mfg_specific_data[BLE_DATA_INDEX_DC26_FLAGS];
-		} else {
-			badge.flags = 0x00;
-		}
+#else
+			}
+	        }
 
 		// Process the RSSI for meter display
 		mbp_rssi_badge_heard(badge.device_id, badge.rssi);
@@ -401,6 +415,7 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 										badge.flags,
 										badge.rssi);
 
+#endif
 	}	/* Done with processing advertisement from a badge. */
 
 	// Handle beacon scanning
@@ -598,7 +613,7 @@ static void __gap_init(void) {
 	err_code = sd_ble_gap_device_name_set(&sec_mode, (const uint8_t *) DEVICE_NAME, strlen(DEVICE_NAME));
 	APP_ERROR_CHECK(err_code);
 
-	err_code = sd_ble_gap_appearance_set(APPEARANCE_ID_STANDARD_DC26);
+	err_code = sd_ble_gap_appearance_set(BADGE_APPEARANCE);
 	APP_ERROR_CHECK(err_code);
 
 	memset(&gap_conn_params, 0, sizeof(gap_conn_params));
@@ -896,6 +911,12 @@ void util_ble_name_set(char *name) {
 	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&sec_mode);
 	APP_ERROR_CHECK(sd_ble_gap_device_name_set(&sec_mode, (const uint8_t * ) name_temp, strlen(name_temp)));
 	ble_advdata_set(&m_adv_data, NULL);
+}
+
+void util_ble_appearance_set(uint16_t appearance) {
+	uint32_t err_code;
+	err_code = sd_ble_gap_appearance_set(appearance);
+	APP_ERROR_CHECK(err_code);
 }
 
 void util_ble_flags_set(void) {
