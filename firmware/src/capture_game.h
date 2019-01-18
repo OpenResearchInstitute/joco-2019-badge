@@ -26,7 +26,8 @@
 #define MINUTES_30 1800
 
 // General parameters
-#define CAPTURE_MAX_INDEX 255
+#define CAPTURE_MAX_INDEX 255 // cannot exceed 9999
+#define CAPTURE_TIMER_INTERVAL 1000 // milliSeconds
 
 // Sending parameters
 #define CAPTURE_SENDING_INTERVAL MINUTES_20

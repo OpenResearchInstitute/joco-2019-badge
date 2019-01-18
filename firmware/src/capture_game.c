@@ -20,7 +20,13 @@
 
 #include "system.h"
 
-static bool capture_sending = false;
+typedef struct {
+	bool	sending;
+	uint8_t		unused;
+} capture_timer_state_t;
+capture_timer_state_t	capture_state;
+
+APP_TIMER_DEF(m_capture_timer);
 
 void __encode_name(uint16_t cid, char *name) {
 	if (cid > 9999) {
@@ -42,12 +48,26 @@ uint16_t __decode_name(char *name) {
 	return atoi(&name[2]);
 }
 
+static void __capture_timer_handler(void * p_data) {
+	// This should fire once per second.
+	// TODO Do some things
+	app_sched_execute();
+}
+
 void capture_init(void) {
-	capture_sending = false;
+	uint32_t err_code;
+	err_code = app_timer_create(&m_capture_timer, APP_TIMER_MODE_REPEATED, __capture_timer_handler);
+	APP_ERROR_CHECK(err_code);
+
+	uint32_t ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
+	err_code = app_timer_start(m_capture_timer, ticks, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	capture_state.sending = false;
 }
 
 bool capture_is_sending() {
-	return capture_sending;
+	return capture_state.sending;
 }
 
 void capture_process_heard(char *name) {
@@ -56,6 +76,12 @@ void capture_process_heard(char *name) {
 	creature_id = __decode_name(name);
 	if (creature_id != 0) {
 		// alert the user that a creature is in the area
+		//Stop background LED display
+		util_led_clear();
+		mbp_background_led_stop();
+		app_sched_pause();
+		// TODO Display the notification
+
 	} else {
 		// TODO This shouldn't happen
 	}
@@ -76,7 +102,7 @@ void capture_send_creature(void) {
 	// TODO Set a timer or counter to only send a limited number of these creature advertisements
 	// TODO Set the advertising data packet data
 	// Enable advertising
-	capture_sending = true;
+	capture_state.sending = true;
 	util_ble_on();
 }
 
@@ -90,7 +116,7 @@ void capture_stop_send_creature() {
 	// restore the appearance ID to BADGE_APPEARANCE
 	util_ble_appearance_set(BADGE_APPEARANCE);
 	// Enable advertising
-	capture_sending = false;
+	capture_state.sending = false;
 	util_ble_on();
 }
 
