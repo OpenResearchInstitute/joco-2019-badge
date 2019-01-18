@@ -44,7 +44,7 @@ extern bool capture_is_sending(void);
 extern void capture_process_heard(char *name);
 
 // handle starting a cycle of sending creature advertisements
-extern void capture_send_creature(char *name);
+extern void capture_send_creature(void);
 
 // handle cleaning up after a cycle of sending creature advertisements
 extern void capture_stop_send_creature();

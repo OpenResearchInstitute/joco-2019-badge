@@ -22,6 +22,26 @@
 
 static bool capture_sending = false;
 
+void __encode_name(uint16_t cid, char *name) {
+	if (cid > 9999) {
+		cid = 9999;
+	}
+	// assumes the string destination is SETTING_NAME_LENGTH
+	*name++ = 0; // Start with a Null Character to make this not valid for display (i.e. the wall)
+	*name++ = 42; // a tag
+	sprintf(name, "%04d", cid);
+}
+
+uint16_t __decode_name(char *name) {
+	if ((name[0] != 0) || (name[1] != 42)) {
+		return 0;
+	}
+	if (strlen(&name[2]) != 4) {
+		return 0;
+	}
+	return atoi(&name[2]);
+}
+
 void capture_init(void) {
 	capture_sending = false;
 }
@@ -31,16 +51,26 @@ bool capture_is_sending() {
 }
 
 void capture_process_heard(char *name) {
+	uint16_t creature_id;
 	// parse the creature index from the name field
-	// alert the user that a creature is in the area
+	creature_id = __decode_name(name);
+	if (creature_id != 0) {
+		// alert the user that a creature is in the area
+	} else {
+		// TODO This shouldn't happen
+	}
 }
 
-void capture_send_creature(char *name) {
+void capture_send_creature(void) {
+	char name[SETTING_NAME_LENGTH];
+	uint16_t creature_id;
 	// Set up to send some advertising packets identifying as a creature, instead of our normal info
 	// Disable advertising
 	util_ble_off();
 	// TODO Select a creature ID to send
-	// TODO Encode it into the name field
+	creature_id = 12345;
+	// Encode it into the name field
+	__encode_name(creature_id, name);
 	// Change the Appearance ID to make this a 'creature' advertisement
 	util_ble_appearance_set(APPEARANCE_ID_CREATURE);
 	// TODO Set a timer or counter to only send a limited number of these creature advertisements
