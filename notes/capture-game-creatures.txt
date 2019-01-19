@@ -1,0 +1,7 @@
+# Name is 10? chars max
+Number, Name, percentage
+0001,   Tiger,      100
+0002,   Antelope,   100
+0003,   Lion,       10  
+0004,   Cutecat,    50
+0005,   Macaque,    80
