@@ -24,7 +24,7 @@ typedef struct {
 	bool        initialized;
 	bool	    sending;
 	uint16_t    max_index;
-	uint8_t     unused;
+	uint16_t    countdown;
 } capture_state_t;
 capture_state_t	capture_state;
 
@@ -52,14 +52,32 @@ uint16_t __decode_name(char *name) {
 
 static void __capture_timer_handler(void * p_data) {
 	// This should fire once per second.
-	// TODO Do some things
+	if (capture_state.initialized) {
+		if (--capture_state.countdown == 0) {
+			if (!capture_state.sending) {
+				// Start sending
+				capture_send_creature();
+				// Set countdown so we stop sending
+				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_LENGTH);
+			} else {
+				// Stop sending
+				capture_stop_send_creature();
+				// Set countdown to start next sending time
+				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
+				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+			}
+		}
+	}
 	app_sched_execute();
 }
 
 void capture_init(void) {
 	capture_state.initialized = false;
 	capture_state.sending = false;
-
+	capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
+	capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+		
+	// Find out how many creature we have available to send
 	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
 	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
 	if (result != FR_OK) {

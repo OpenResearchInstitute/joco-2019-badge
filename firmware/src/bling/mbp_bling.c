@@ -31,7 +31,7 @@
 
 #include "../system.h"
 
-#define BACKGROUND_LED_TIME_MS     10  // -spc- NOTE was called tooth_timer
+#define BACKGROUND_LED_TIME_MS     10
 #define BG_TICKS_PER_SECOND		(1000/BACKGROUND_LED_TIME_MS)
 
 #define TOOTH_SAT                  1.0
@@ -1029,8 +1029,10 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
         }
     }
 
-    if (++bg_cycle_count > EYE_CYCLE_LEN)
-        bg_cycle_count = 0;
+    if (++bg_cycle_count > EYE_CYCLE_LEN) {
+	    app_sched_event_put(NULL, 0, hello_background_handler);
+	    bg_cycle_count = 0;
+    }
 
     util_led_show();
 
