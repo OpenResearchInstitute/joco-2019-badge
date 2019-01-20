@@ -28,6 +28,9 @@
 // General parameters
 #define CAPTURE_MAX_INDEX 255 // cannot exceed 9999
 #define CAPTURE_TIMER_INTERVAL 1000 // milliSeconds
+#define CAPTURE_MAX_NAME_LEN 10
+#define CAPTURE_MAX_INDEX_DIGITS 4
+#define CAPTURE_MAX_DAT_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
 
 // Sending parameters
 #define CAPTURE_SENDING_INTERVAL MINUTES_20
@@ -38,8 +41,8 @@
 
 // Initialize anything
 extern void capture_init(void);
-extern bool capture_is_sending(void);
 
+extern bool capture_is_sending(void);
 
 // handle hearing a creature advertisement
 extern void capture_process_heard(char *name);
