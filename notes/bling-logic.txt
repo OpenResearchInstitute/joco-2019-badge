@@ -1,0 +1,13 @@
+During the background bling timer callback, the hello logic is called, and displays a hello is conditions are met.
+
+The hello bling is blocking and uses spin timers, and continues/returns after the hello display is finished.
+
+Blings which are selected from menus eventually end up being a call to mbp_bling_<blingname>(), which almost always calls
+simple_filebased_bling().
+
+This calls util_gfx_draw_raw_file(), which has a callback supplied to update the LEDs each frame.
+
+
+This loops (or not) and makess a callback each frame (or not), until a button is pressed by the user.
+The button ID that was pressed is returned.
+
