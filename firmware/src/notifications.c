@@ -18,8 +18,8 @@
 
 #include "system.h"
 
-#define GAMEPLAY_UI_MARGIN         3
-#define GAMEPLAY_UI_MARGIN_RIGHT  12
+#define NOTIFICATION_UI_MARGIN         3
+#define NOTIFICATION_UI_MARGIN_RIGHT  12
 
 notifications_state_t	notifications_state;
 
@@ -29,21 +29,20 @@ void notifications_init() {
     return;
 }
 
+// TODO NOTE - the score code that this is based on keeps the background LED bling running while in here.
 void capture_notification_callback() {
 
     //buffer for formatting text
     char temp[32];
 
     bool redraw = true;
+    bool loop = true;
+
+    notifications_state.requested = false; // Set this false to ack that we're working on it
 
     while (1) {
 	if (redraw || !util_gfx_is_valid_state()) {
-#if INCLUDE_QSO
-	    uint16_t qso_count = mbp_state_qso_count_get();
-#endif
-#if INCLUDE_MM
-	    uint16_t mm_count = mbp_state_mm_count_get();
-#endif
+
 #if INCLUDE_CAPTURE
 	    uint16_t capture_count = mbp_state_capture_count_get();
 #endif
@@ -57,42 +56,29 @@ void capture_notification_callback() {
 	    //Print their name
 	    util_gfx_set_font(FONT_LARGE);
 	    util_gfx_set_color(COLOR_WHITE);
-	    util_gfx_set_cursor(0, GAMEPLAY_UI_MARGIN);
+	    util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
 	    mbp_state_name_get(temp);
 	    util_gfx_print(temp);
 
 	    util_gfx_set_color(COLOR_LIGHTBLUE);
 	    strcpy(temp, "GAME STATS");
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 26);
+	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 26);
 	    util_gfx_print(temp);
 
 #if INCLUDE_CAPTURE
 	    //Print their capture count
 	    util_gfx_set_color(COLOR_YELLOW);
 	    sprintf(temp, "Captured: %u", capture_count);
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 60);
-	    util_gfx_print(temp);
-#endif
-#if INCLUDE_QSO
-	    //Print their QSO count
-	    util_gfx_set_color(COLOR_YELLOW);
-	    sprintf(temp, "QSOs %u", qso_count);
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 60);
-	    util_gfx_print(temp);
-#endif
-#if INCLUDE_MM
-	    //Print the number of Mastermind puzzles solved
-	    sprintf(temp, "Codes %u", mm_count);
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 75);
+	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 60);
 	    util_gfx_print(temp);
 #endif
 	    //Print points
 	    util_gfx_set_color(COLOR_RED);
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 95);
+	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 95);
 	    util_gfx_print("Points:");
 
 		sprintf(temp, "    %u", mbp_state_score_get());
-		util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 110);
+		util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 110);
 		util_gfx_print(temp);
 
 		redraw = false;
@@ -101,8 +87,18 @@ void capture_notification_callback() {
 	//validate screen state
 	util_gfx_validate();
 
-	util_button_wait();
-	util_button_clear();
+	// Spin until we time out or the user presses a button
+	do {
+		if (util_button_state() > 0) {
+			// we had a button press
+			notifications_state.status = util_button_state();
+			util_button_clear();	//Clean up button state
+			loop = false;
+		} else if (false) { // test for timeout
+			notifications_state.status = BUTTON_MASK_SPECIAL;;
+			loop = false;
+		}
+	} while (loop);
 	return;
     }
 }
