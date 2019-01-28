@@ -640,7 +640,7 @@ void mbp_system_unlock_state() {
 
 	util_led_clear();
 
-	//If they've unlocked all 16 set all LEDs to blue
+	//If they've unlocked all 16 set all LEDs
 	if (unlock == 0xFFFF) {
 		util_led_set_all(0, 0, 255);
 	} else {

@@ -579,7 +579,7 @@ void mbp_menu_main() {
 //	}
 
 	menu.items = items;
-	menu.title = "TRANSIO";
+	menu.title = "JOCO19";
 
 	mbp_background_led_start();
 	mbp_menu(&menu);

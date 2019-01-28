@@ -112,6 +112,7 @@ SRC_FILES += \
 	mbp_tcl.c \
 	mbp_term.c \
 	mbp_ui.c \
+	notifications.c \
 	score_ble.c \
 	skifree.c \
 	transio_log.c \

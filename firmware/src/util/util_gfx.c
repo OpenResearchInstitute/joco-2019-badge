@@ -451,7 +451,7 @@ void util_gfx_draw_raw(int16_t x, int16_t y, uint16_t w, uint16_t h, uint8_t *p_
 	}
 }
 
-uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_frame_callback)(uint8_t frame, void *p_data), bool loop,
+uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_frame_callback)(uint8_t frame, void *p_data), bool loop,
 		void *data) {
 	FIL raw_file;
 	FRESULT result;
@@ -560,6 +560,13 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 				util_button_clear();	//Clean up button state
 				break;					//Quit the for loop
 			}
+
+			// Check to see if a notification needs to be displayed
+			if (notifications_state.requested) {
+				loop = false;
+				button = BUTTON_MASK_SPECIAL;
+				break;
+			}
 		}
 
 //		if (frames > 4) {
@@ -578,6 +585,30 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 
 	//All done, if looping button state will the button that caused it to quit, otherwise 0
 	return button;
+}
+
+uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_frame_callback)(uint8_t frame, void *p_data), bool loop,
+		void *data) {
+	uint8_t rstat;
+	bool done;
+	done = false;
+	// In order to be able to handle async requests for notifications, we repeatedly call to draw the bling.
+	// If we get a return value of BUTTON_MASK_SPECIAL, then we know that control returned not because the user pressed
+	// a button, but because we need to display a notification. In that case, since we interrupted a bling, we restart it
+	// after the notification is done
+	do {
+		rstat = __util_gfx_draw_raw_file_inner(filename, x, y, w, h, p_frame_callback, loop, data);
+		if (rstat == BUTTON_MASK_SPECIAL) {
+			// TODO Validate that callback pointer
+			// Call the notification callback.
+			notifications_state.p_notification_callback();
+			// Done with the notification callback, just fall through and re-call the custom bling
+		} else {
+			// The user terminated the bling, so we just return that button value
+			done = true;
+		}
+	} while (!done);
+	return rstat;
 }
 
 void util_gfx_draw_raw_file_stop() {

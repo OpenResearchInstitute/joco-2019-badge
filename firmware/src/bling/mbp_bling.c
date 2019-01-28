@@ -1030,6 +1030,7 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
     }
 
     if (++bg_cycle_count > EYE_CYCLE_LEN) {
+	    // Schedule a check to see whether to display a hello
 	    app_sched_event_put(NULL, 0, hello_background_handler);
 	    bg_cycle_count = 0;
     }

@@ -163,6 +163,7 @@
 #include "mbp_tcl.h"
 #include "mbp_term.h"
 #include "mbp_ui.h"
+#include "notifications.h"
 #include "ntshell.h"
 #include "ntopt.h"
 #include "partcl/tcl.h"

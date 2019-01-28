@@ -114,6 +114,8 @@ int main(void) {
 	util_led_init();
 	util_led_clear();
 
+	notifications_init();
+	
 	//Init tilt sensor, this should happen before SD so it's available in self test
 	util_tilt_start();
 
@@ -152,13 +154,13 @@ int main(void) {
 
 #if INCLUDE_CAPTURE
 	capture_init();
-#endif
+#endif // INCLUDE_CAPTURE
 	//Startup game
 	// TBD
 //!!!	score_ble_init();	with this off, we don't run the score/command services on BLE
 #if INCLUDE_QSO
 	transio_qso_callsign_update();
-#endif
+#endif // INCLUDE_QSO
 	util_ble_flags_set();
 
 	//Start terminal
@@ -186,7 +188,7 @@ int main(void) {
 
 #ifdef UNLOCK_ALL_BLING
         mbp_state_unlock_set(0xFFFF);
-#endif
+#endif // UNLOCK_ALL_BLING
 
 	while (1) {
 		app_sched_execute();
@@ -194,13 +196,13 @@ int main(void) {
 
 		mbp_system_unlock_state();
 	}
-#else
+#else // BLE_ONLY_BUILD
 	util_ble_init();
 	util_ble_advertising_start();
 	while (1) {
 		//do nothing
 	}
-#endif
+#endif // BLE_ONLY_BUILD
 }
 
 /**@brief Function for asserts in the SoftDevice.
