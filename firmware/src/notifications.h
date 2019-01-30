@@ -27,14 +27,13 @@ typedef struct {
 	uint16_t    led_style;
 	bool        requested;
 	uint8_t	    status;
-	char        image_filename[13]; // 8.3 plus a terminator
+	char        image_filename[20]; // 8.3 plus a terminator plus any possible path
 	// filename for LED bling??
 } notifications_state_t;
 
 extern notifications_state_t notifications_state;
 
 extern void notifications_init();
-//extern void add_to_score(int16_t points, char *name);
-//extern void game_status_screen();
+extern void capture_notification_callback();
 
 #endif /* NOTIFICATIONS_H_ */

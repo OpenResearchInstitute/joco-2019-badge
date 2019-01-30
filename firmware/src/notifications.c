@@ -38,6 +38,7 @@ void capture_notification_callback() {
     bool redraw = true;
     bool loop = false;
 
+    notifications_state.status = 0; // this signals completion status, so make sure it's clear
     notifications_state.requested = false; // Set this false to ack that we're working on it
 
     while (1) {
@@ -48,6 +49,9 @@ void capture_notification_callback() {
 
 	    //Draw background
 	    mbp_ui_cls();
+
+	    // TODO Load the graphic file as background
+	    
 
 	    //Print their name
 	    util_gfx_set_font(FONT_LARGE);
@@ -111,6 +115,8 @@ void capture_notification_callback() {
 			}
 			loop = false;
 		}
+		// spin for some period
+		nrf_delay_ms(100);
 	} while (loop);
 
 	return;

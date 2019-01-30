@@ -105,6 +105,11 @@ bool capture_is_sending() {
 	return capture_state.sending;
 }
 
+//
+// TODO move the code to read creature file(s) out of __choose_creature, so that they can be used to retrieve
+// information about whether a creature when you have the creature number.
+//
+
 uint16_t __choose_creature(void) {
 	uint8_t ttl = 50;
 	bool creature_found = false;
@@ -158,12 +163,41 @@ void capture_process_heard(char *name) {
 	// parse the creature index from the name field
 	creature_id = __decode_name(name);
 	if (creature_id != 0) {
-		// alert the user that a creature is in the area
-		//Stop background LED display
-		util_led_clear();
-		mbp_background_led_stop();
-		app_sched_pause();
-		// TODO Display the notification
+		// make sure we're not already presenting a notification
+		// TODO we need a mutex or semaphore here
+		//if ((notifications_state.requested == true) || (notifications_state.status )) {
+		//	// TODO
+		//}
+		// notify the user that a creature is in the area
+		notifications_state.p_notification_callback = capture_notification_callback;
+		notifications_state.timeout = CAPTURE_DISPLAY_TIME_LENGTH;
+		// TODO change the notification LED style based on whether we've seen this creature before
+		// or maybe how rare it is
+		notifications_state.led_style = LED_STYLE_RED_FLASH;
+		// Creature filenames are "nnnn.RAW", based on the creature number
+		sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
+		notifications_state.status = 0;
+		notifications_state.requested = true; // this triggers either background or bling loops to pick this up
+		while (notifications_state.requested == true); // spin until we know that the request has been picked up
+		while (notifications_state.status == 0); // spin until we get a result
+		switch (notifications_state.status) {
+		case BUTTON_MASK_SPECIAL:
+			// the notification timed out
+			break;
+		case BUTTON_MASK_UP:
+		case BUTTON_MASK_DOWN:
+		case BUTTON_MASK_LEFT:
+		case BUTTON_MASK_RIGHT:
+		case BUTTON_MASK_ACTION:
+			// Count anything else as accepting the capture
+			// TODO complete the capture
+			break;
+		default:
+			break;
+		}
+		// Clear up any state
+		notifications_state.status = 0;
+
 
 	} else {
 		// TODO This shouldn't happen
