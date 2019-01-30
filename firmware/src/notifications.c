@@ -36,16 +36,12 @@ void capture_notification_callback() {
     char temp[32];
 
     bool redraw = true;
-    bool loop = true;
+    bool loop = false;
 
     notifications_state.requested = false; // Set this false to ack that we're working on it
 
     while (1) {
 	if (redraw || !util_gfx_is_valid_state()) {
-
-#if INCLUDE_CAPTURE
-	    uint16_t capture_count = mbp_state_capture_count_get();
-#endif
 
 	    //Make sure there's no clipping
 	    util_gfx_cursor_area_reset();
@@ -61,44 +57,62 @@ void capture_notification_callback() {
 	    util_gfx_print(temp);
 
 	    util_gfx_set_color(COLOR_LIGHTBLUE);
-	    strcpy(temp, "GAME STATS");
+	    strcpy(temp, "A NOTIFICATION");
 	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 26);
 	    util_gfx_print(temp);
+	    if (mbp_notification_led_running()) {
+	        strcpy(temp, "REENTERED");
+	        util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 52);
+	        util_gfx_print(temp);
+	    }
 
-#if INCLUDE_CAPTURE
-	    //Print their capture count
-	    util_gfx_set_color(COLOR_YELLOW);
-	    sprintf(temp, "Captured: %u", capture_count);
-	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 60);
-	    util_gfx_print(temp);
-#endif
 	    //Print points
 	    util_gfx_set_color(COLOR_RED);
 	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 95);
-	    util_gfx_print("Points:");
+	    util_gfx_print("Name:");
 
-		sprintf(temp, "    %u", mbp_state_score_get());
-		util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 110);
-		util_gfx_print(temp);
+	    sprintf(temp, "    %u", mbp_state_score_get());
+	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 110);
+	    util_gfx_print(temp);
 
-		redraw = false;
+	    redraw = false;
+	    loop = true;
 	}
 
 	//validate screen state
 	util_gfx_validate();
 
+
+	bool background_was_running = mbp_background_led_running();
+
+	mbp_background_led_stop();
+
+	mbp_notification_led_start();
+
 	// Spin until we time out or the user presses a button
+	uint32_t end_time = util_millis() + (notifications_state.timeout * 1000);
 	do {
 		if (util_button_state() > 0) {
 			// we had a button press
 			notifications_state.status = util_button_state();
 			util_button_clear();	//Clean up button state
+			mbp_notification_led_stop();
+			//Only start background LED display if previously running
+			if (background_was_running) {
+				mbp_background_led_start();
+			}
 			loop = false;
-		} else if (false) { // test for timeout
+		} else if (util_millis() > end_time) { // test for timeout
 			notifications_state.status = BUTTON_MASK_SPECIAL;;
+			mbp_notification_led_stop();
+			//Only start background LED display if previously running
+			if (background_was_running) {
+				mbp_background_led_start();
+			}
 			loop = false;
 		}
 	} while (loop);
+
 	return;
     }
 }

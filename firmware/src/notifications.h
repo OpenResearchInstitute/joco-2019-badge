@@ -18,11 +18,15 @@
 #ifndef NOTIFICATIONS_H_
 #define NOTIFICATIONS_H_
 
+#define LED_STYLE_RED_FLASH 1
+#define LED_STYLE_GREEN_FLASH 2
+
 typedef struct {
+	void        (*p_notification_callback)(void);
+	uint32_t    timeout; // in seconds
+	uint16_t    led_style;
 	bool        requested;
 	uint8_t	    status;
-	void        (*p_notification_callback)(void);
-	uint16_t    timeout; // in seconds
 	char        image_filename[13]; // 8.3 plus a terminator
 	// filename for LED bling??
 } notifications_state_t;
