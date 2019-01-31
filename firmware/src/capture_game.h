@@ -34,9 +34,12 @@
 #define CAPTURE_MAX_INDEX_DIGITS 4
 #define CAPTURE_MAX_DAT_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
 
+// Scoring
+#define POINTS_4_CAPTURE 100
+#define POINTS_4_RARITY  20 // Max points miltiplier available for rarity
 
 // Sending parameters
-// Remember when seeting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
+// Remember when setting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
 // an opportunity at least this often. 
 #ifdef CAPTURE_FAST_TEST
 #define CAPTURE_SENDING_INTERVAL 120

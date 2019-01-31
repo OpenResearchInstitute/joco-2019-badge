@@ -30,7 +30,7 @@ capture_state_t	capture_state;
 
 typedef struct {
 	char        name[CAPTURE_MAX_NAME_LEN + 1];
-	uint32_t    percent;
+	uint8_t     percent;
 } creature_data_t;
 
 APP_TIMER_DEF(m_capture_timer);
@@ -55,94 +55,13 @@ uint16_t __decode_name(char *name) {
 	return atoi(&name[2]);
 }
 
-static void __capture_timer_handler(void * p_data) {
-	// This should fire once per second. It handles two tasks
-	if (capture_state.initialized) {
-		// If it's time to send a random creature, do that
-		if (--capture_state.countdown == 0) {
-			if (!capture_state.sending) {
-				// Start sending
-				capture_send_creature();
-				// Set countdown so we stop sending
-				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_LENGTH);
-			} else {
-				// Stop sending
-				capture_stop_send_creature();
-				// Set countdown to start next sending time
-				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
-				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
-			}
-		}
-		// See if we have a notification request that has completed.
-		if (notifications_state.state == NOTIFICATIONS_STATE_COMPLETE) {
-			switch (notifications_state.button_value) {
-			case BUTTON_MASK_UP:
-			case BUTTON_MASK_DOWN:
-			case BUTTON_MASK_LEFT:
-			case BUTTON_MASK_RIGHT:
-			case BUTTON_MASK_ACTION:
-				// user pressed a button
-				// TODO get the creature information and increment the score by the right amount
-				mbp_state_capture_set_captured(notifications_state.user_data);
-				notifications_state.user_data = 0;
-				break;
-			case BUTTON_MASK_SPECIAL:
-				// the notification timed out, so do nothing
-				break;
-			default:
-				break;
-			}
-			notifications_state.state = NOTIFICATIONS_STATE_IDLE; // ready for another notification
-		}
-	}
-	app_sched_execute();
+uint16_t __rarity_to_points(uint8_t percent) {
+	return (POINTS_4_CAPTURE + ((100 - percent) * POINTS_4_RARITY));
 }
-
-void capture_init(void) {
-	capture_state.initialized = false;
-	capture_state.sending = false;
-	capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
-	capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
-		
-	// Find out how many creature we have available to send
-	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
-	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
-	if (result != FR_OK) {
-		return;
-	}
-
-	creaturedat[CAPTURE_MAX_INDEX_DIGITS + 1] = 0; // provide a hard stop for strtol
-	uint32_t num_creatures = strtol(creaturedat, NULL, 10);
-	if (num_creatures > CAPTURE_MAX_INDEX) {
-		return;
-	} else {
-		capture_state.max_index = (uint16_t) num_creatures;
-		capture_state.initialized = true;
-	}
-
-	uint32_t err_code;
-	err_code = app_timer_create(&m_capture_timer, APP_TIMER_MODE_REPEATED, __capture_timer_handler);
-	APP_ERROR_CHECK(err_code);
-
-	uint32_t ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
-	err_code = app_timer_start(m_capture_timer, ticks, NULL);
-	APP_ERROR_CHECK(err_code);
-}
-
-bool capture_is_sending() {
-	return capture_state.sending;
-}
-
-//
-// TODO move the code to read creature file(s) out of __choose_creature, so that they can be used to retrieve
-// information about a creature when you have the creature number.
-//
 
 bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
 	char fname[20];
-	//char        name[CAPTURE_MAX_NAME_LEN + 1];
-	//uint32_t    percent;
 
 	// read the data file for that creature
 	sprintf(fname, "CAPTURE/%04d.DAT", id);
@@ -173,9 +92,97 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 		return false;
 	} else {
 		pch++;
-		creature_data->percent = strtol(pch, NULL, 10);
+		uint32_t tpct = strtol(pch, NULL, 10);
+		if (tpct > 100) {
+			tpct = 100;
+		}
+		creature_data->percent = (uint8_t) tpct;
 		return true;
 	}
+}
+
+static void __capture_timer_handler(void * p_data) {
+	creature_data_t creature_data;
+	bool ok;
+	// This should fire once per second. It handles two tasks
+	if (capture_state.initialized) {
+		// If it's time to send a random creature, do that
+		if (--capture_state.countdown == 0) {
+			if (!capture_state.sending) {
+				// Start sending
+				capture_send_creature();
+				// Set countdown so we stop sending
+				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_LENGTH);
+			} else {
+				// Stop sending
+				capture_stop_send_creature();
+				// Set countdown to start next sending time
+				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
+				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+			}
+		}
+		// See if we have a notification request that has completed.
+		if (notifications_state.state == NOTIFICATIONS_STATE_COMPLETE) {
+			switch (notifications_state.button_value) {
+			case BUTTON_MASK_UP:
+			case BUTTON_MASK_DOWN:
+			case BUTTON_MASK_LEFT:
+			case BUTTON_MASK_RIGHT:
+			case BUTTON_MASK_ACTION:
+				// user pressed a button
+				ok = __read_creature_data(notifications_state.user_data, &creature_data);
+				if (ok) {
+					// add to score
+					add_to_score(__rarity_to_points(creature_data.percent), creature_data.name);
+					mbp_state_capture_set_captured(notifications_state.user_data);
+					notifications_state.user_data = 0;
+				}
+				break;
+			case BUTTON_MASK_SPECIAL:
+				// the notification timed out, so do nothing
+				break;
+			default:
+				break;
+			}
+			notifications_state.state = NOTIFICATIONS_STATE_IDLE; // ready for another notification
+		}
+	}
+	app_sched_execute();
+}
+
+void capture_init(void) {
+	capture_state.initialized = false;
+	capture_state.sending = false;
+	capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
+	capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+		
+	// Find out how many creature we have available to send
+	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
+	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
+	if (result != FR_OK) {
+		return;
+	}
+
+	creaturedat[CAPTURE_MAX_INDEX_DIGITS + 1] = 0; // provide a hard stop for strtol
+	uint32_t num_creatures = strtol(creaturedat, NULL, 10);
+	if (num_creatures > (CAPTURE_MAX_INDEX + 1)) {
+		return;
+	} else {
+		capture_state.max_index = (uint16_t) num_creatures - 1;
+		capture_state.initialized = true;
+	}
+
+	uint32_t err_code;
+	err_code = app_timer_create(&m_capture_timer, APP_TIMER_MODE_REPEATED, __capture_timer_handler);
+	APP_ERROR_CHECK(err_code);
+
+	uint32_t ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
+	err_code = app_timer_start(m_capture_timer, ticks, NULL);
+	APP_ERROR_CHECK(err_code);
+}
+
+bool capture_is_sending() {
+	return capture_state.sending;
 }
 
 uint16_t __choose_creature(void) {
@@ -224,14 +231,14 @@ void capture_process_heard(char *name) {
 
 	// parse the creature index from the name field
 	creature_id = __decode_name(name);
-	if (creature_id != 0) { // TODO Change this to test for the possible range of creatures we have on SD card
+	if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
 		if (mbp_state_captured_is_captured(creature_id)) {
 			// Don't notify more than once for each creature, because sending lasts a while for each one
 			return;
 		}
 		notifications_state.p_notification_callback = capture_notification_callback;
 
-		// possibly TODO make changes based on how rare it is
+		// possibly TODO make changes in appearance based on how rare it is
 		notifications_state.timeout = CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH;
 		notifications_state.led_style = LED_STYLE_RED_FLASH;
 
@@ -241,7 +248,7 @@ void capture_process_heard(char *name) {
 		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
 
 	} else {
-		// TODO This shouldn't happen
+		mbp_ui_error("received invalid creature ID");
 	}
 }
 
@@ -261,8 +268,6 @@ void capture_send_creature(void) {
 	__encode_name(creature_id, name);
 	// Change the Appearance ID to make this a 'creature' advertisement
 	util_ble_appearance_set(APPEARANCE_ID_CREATURE);
-	// TODO Set a timer or counter to only send a limited number of these creature advertisements
-	// TODO Set the advertising data packet data
 	// Enable advertising
 	capture_state.sending = true;
 	util_ble_on();
