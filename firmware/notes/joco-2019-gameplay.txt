@@ -32,8 +32,8 @@ Each base name is four digits.
 
 nnnn.RAW - an image of the creature
 nnnn.DAT - a structured file containing:
-    a fixed-length text name of the creature
-    a rarity multiplier 
+    a text name of the creature (10 characters max)
+    a probablility from 0-100 that this creature is broadcast. This is applied after a creature is randomly selected from the list of all creatures. If a check against this probability fails, th ecreature is skipped, and another one is selected at random from among all creatures.
 
 The score for each creature can be calculated from a base score and some factor times the rarity multiplier
 
@@ -53,7 +53,7 @@ Each badge will need to store the following state information about the game:
 * A list of creatures which have been captured
 * The total Score (this can be calculated from the list and rarity multipliers)
 The best way to store the list of creatures is TBD but could be:
-    * A bitfield, perhaps in the badge state file, or in a new file in th egame directory
+    * A bitfield, in the badge state data
     * In the creature DAT file in the game directory
     * By adding a new file per capture in the game directory as a flag.
 

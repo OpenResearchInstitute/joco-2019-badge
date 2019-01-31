@@ -28,10 +28,12 @@
 
 // General parameters
 #define CAPTURE_MAX_INDEX 255 // cannot exceed 9999
+#define CAPTURE_BITMASK_ARRAY_LEN ((CAPTURE_MAX_INDEX/32)+1) // used for tracking which creatures we've captured
 #define CAPTURE_TIMER_INTERVAL 1000 // milliSeconds
 #define CAPTURE_MAX_NAME_LEN 10
 #define CAPTURE_MAX_INDEX_DIGITS 4
 #define CAPTURE_MAX_DAT_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
+
 
 // Sending parameters
 // Remember when seeting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
@@ -47,7 +49,8 @@
 #endif
 
 // receiving and display parameters
-#define CAPTURE_DISPLAY_TIME_LENGTH 60 // Seconds
+#define CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH 40 // Seconds
+#define CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH 5 // Seconds
 
 // Initialize anything
 extern void capture_init(void);

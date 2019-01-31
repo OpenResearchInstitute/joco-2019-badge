@@ -61,6 +61,10 @@ void mbp_state_new() {
 #endif
 #if INCLUDE_CAPTURE
 	m_badge_state.capture_count = 0;
+	for (uint16_t i = 0; i < CAPTURE_BITMASK_ARRAY_LEN; i++) {
+		m_badge_state.capture_bitmask[i] = 0;
+
+	}
 #endif
 	m_badge_state.game_incoming_ok = SETTING_GAME_INCOMING_OK_DEFAULT;
 
@@ -314,6 +318,21 @@ uint16_t mbp_state_capture_count_get() {
 
 void mbp_state_capture_count_increment() {
 	m_badge_state.capture_count++;
+}
+
+void mbp_state_capture_set_captured(uint16_t index) {
+	if (index == 0) {
+		return;
+	}
+	m_badge_state.capture_bitmask[index/32] |= (1 << (index % 32));
+}
+
+bool mbp_state_captured_is_captured(uint16_t index) {
+	if (m_badge_state.capture_bitmask[index/32] & (1 << (index % 32))) {
+		return true;
+	} else {
+		return false;
+	}
 }
 #endif
 

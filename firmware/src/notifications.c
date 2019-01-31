@@ -24,12 +24,12 @@
 notifications_state_t	notifications_state;
 
 void notifications_init() {
-    notifications_state.requested = false;
-    notifications_state.status = 0;
+    notifications_state.state = 0;
+    notifications_state.button_value = 0;
+
     return;
 }
 
-// TODO NOTE - the score code that this is based on keeps the background LED bling running while in here.
 void capture_notification_callback() {
 
     //buffer for formatting text
@@ -38,8 +38,11 @@ void capture_notification_callback() {
     bool redraw = true;
     bool loop = false;
 
-    notifications_state.status = 0; // this signals completion status, so make sure it's clear
-    notifications_state.requested = false; // Set this false to ack that we're working on it
+    // make sure we have a request pending
+    if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
+	    return; // This is an error
+    }
+    notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
 
     while (1) {
 	if (redraw || !util_gfx_is_valid_state()) {
@@ -98,7 +101,7 @@ void capture_notification_callback() {
 	do {
 		if (util_button_state() > 0) {
 			// we had a button press
-			notifications_state.status = util_button_state();
+			notifications_state.button_value = util_button_state();
 			util_button_clear();	//Clean up button state
 			mbp_notification_led_stop();
 			//Only start background LED display if previously running
@@ -107,7 +110,7 @@ void capture_notification_callback() {
 			}
 			loop = false;
 		} else if (util_millis() > end_time) { // test for timeout
-			notifications_state.status = BUTTON_MASK_SPECIAL;;
+			notifications_state.button_value = BUTTON_MASK_SPECIAL;;
 			mbp_notification_led_stop();
 			//Only start background LED display if previously running
 			if (background_was_running) {
@@ -118,6 +121,7 @@ void capture_notification_callback() {
 		// spin for some period
 		nrf_delay_ms(100);
 	} while (loop);
+	notifications_state.state = NOTIFICATIONS_STATE_COMPLETE;
 
 	return;
     }

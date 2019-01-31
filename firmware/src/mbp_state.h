@@ -62,6 +62,7 @@ typedef struct {
 #endif
 #if INCLUDE_CAPTURE
 	uint16_t capture_count;
+	uint32_t capture_bitmask[(CAPTURE_MAX_INDEX/32)+1];
 #endif
 } badge_state_t;
 
@@ -121,13 +122,15 @@ extern void mbp_state_qso_count_increment();
 //Get and increment capture stats
 extern uint16_t mbp_state_capture_count_get();
 extern void mbp_state_capture_count_increment();
-#endif
+extern void mbp_state_capture_set_captured(uint16_t index);
+extern bool mbp_state_captured_is_captured(uint16_t index);
+#endif // INCLUDE_CAPTURE
 
 #if INCLUDE_MM
 //Get and increment count of Mastermind puzzles solved
 extern uint16_t mbp_state_mm_count_get();
 extern void mbp_state_mm_count_increment();
-#endif
+#endif // INCLUDE_MM
 
 //Get and set joco special badge ID
 extern uint8_t mbp_state_special_get();

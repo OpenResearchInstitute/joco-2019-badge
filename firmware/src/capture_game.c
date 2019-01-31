@@ -28,6 +28,11 @@ typedef struct {
 } capture_state_t;
 capture_state_t	capture_state;
 
+typedef struct {
+	char        name[CAPTURE_MAX_NAME_LEN + 1];
+	uint32_t    percent;
+} creature_data_t;
+
 APP_TIMER_DEF(m_capture_timer);
 
 void __encode_name(uint16_t cid, char *name) {
@@ -51,8 +56,9 @@ uint16_t __decode_name(char *name) {
 }
 
 static void __capture_timer_handler(void * p_data) {
-	// This should fire once per second.
+	// This should fire once per second. It handles two tasks
 	if (capture_state.initialized) {
+		// If it's time to send a random creature, do that
 		if (--capture_state.countdown == 0) {
 			if (!capture_state.sending) {
 				// Start sending
@@ -66,6 +72,27 @@ static void __capture_timer_handler(void * p_data) {
 				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
 				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
 			}
+		}
+		// See if we have a notification request that has completed.
+		if (notifications_state.state == NOTIFICATIONS_STATE_COMPLETE) {
+			switch (notifications_state.button_value) {
+			case BUTTON_MASK_UP:
+			case BUTTON_MASK_DOWN:
+			case BUTTON_MASK_LEFT:
+			case BUTTON_MASK_RIGHT:
+			case BUTTON_MASK_ACTION:
+				// user pressed a button
+				// TODO get the creature information and increment the score by the right amount
+				mbp_state_capture_set_captured(notifications_state.user_data);
+				notifications_state.user_data = 0;
+				break;
+			case BUTTON_MASK_SPECIAL:
+				// the notification timed out, so do nothing
+				break;
+			default:
+				break;
+			}
+			notifications_state.state = NOTIFICATIONS_STATE_IDLE; // ready for another notification
 		}
 	}
 	app_sched_execute();
@@ -83,6 +110,7 @@ void capture_init(void) {
 	if (result != FR_OK) {
 		return;
 	}
+
 	creaturedat[CAPTURE_MAX_INDEX_DIGITS + 1] = 0; // provide a hard stop for strtol
 	uint32_t num_creatures = strtol(creaturedat, NULL, 10);
 	if (num_creatures > CAPTURE_MAX_INDEX) {
@@ -107,97 +135,110 @@ bool capture_is_sending() {
 
 //
 // TODO move the code to read creature file(s) out of __choose_creature, so that they can be used to retrieve
-// information about whether a creature when you have the creature number.
+// information about a creature when you have the creature number.
 //
+
+bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
+	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
+	char fname[20];
+	//char        name[CAPTURE_MAX_NAME_LEN + 1];
+	//uint32_t    percent;
+
+	// read the data file for that creature
+	sprintf(fname, "CAPTURE/%04d.DAT", id);
+	FRESULT result = util_sd_load_file(fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
+	if (result != FR_OK) {
+		mbp_ui_error("Could not read creature data.");
+		return false;
+	}
+	// Parse the data file. the name is first and ends in a newline (0x0A)
+	file_data[CAPTURE_MAX_DAT_FILE_LEN] = 0;
+	uint16_t cctr = 0;
+	char *pch = &creature_data->name[0];
+	char *pdst = &creature_data->name[0];
+
+	while ((*pch != 0x0A) && (cctr < CAPTURE_MAX_NAME_LEN)) {
+		// we should probably test for nonprintables here
+		if (*pch == 0x0A) {
+			*pdst = 0; // null terminate the name string
+			break;
+		} else {
+			*pdst++ = *pch++;
+			cctr++;
+		}
+	}
+
+	if (cctr >= CAPTURE_MAX_NAME_LEN) {
+		mbp_ui_error("Could not parse creature name.");
+		return false;
+	} else {
+		pch++;
+		creature_data->percent = strtol(pch, NULL, 10);
+		return true;
+	}
+}
 
 uint16_t __choose_creature(void) {
 	uint8_t ttl = 50;
 	bool creature_found = false;
 	uint16_t creature_id = 0; // 0 is invalid
-	uint32_t tmp_l;
-	char creature_data[CAPTURE_MAX_DAT_FILE_LEN+1];
-
+	creature_data_t creature_data;
 	while ((!creature_found) && (--ttl > 0)) {
 		// Generate a random number in the range of 1 <= index <= max_index
 		creature_id = util_math_rand16_max(capture_state.max_index-1);
 		creature_id++; // because 0 is invalid
 
-		// read the data file for that creature
-		char fname[20];
-		sprintf(fname, "CAPTURE/%04d.DAT", creature_id);
-		FRESULT result = util_sd_load_file(fname, (uint8_t *) creature_data, CAPTURE_MAX_DAT_FILE_LEN);
-		if (result != FR_OK) {
-			mbp_ui_error("Could not read creature data.");
+		bool ok = __read_creature_data(creature_id, &creature_data);
+		if (!ok) {
 			return 0;
 		}
-		// Parse the data file. the name is first and ends in a newline (0x0A)
-		// we don't really care about the name here, only the rarity value from 0-100 which follows
-		creature_data[CAPTURE_MAX_DAT_FILE_LEN] = 0;
-		char *pch = creature_data;
-		uint16_t cctr;
-		while ((*pch != 0x0A) && (cctr > CAPTURE_MAX_DAT_FILE_LEN)) {
-			pch++;
-			cctr++;
-		}
-		if (*pch == 0x0A) {
-			pch++;
-			tmp_l = strtol(pch, NULL, 10);
-		} else {
-			return 0;
-		}
-		if ((tmp_l > 0) && (tmp_l <=100)) {
-			uint8_t chance;
-			chance = util_math_rand8_max(100);
-			if (tmp_l >= chance) {
+
+		if ((creature_data.percent > 0) && (creature_data.percent <= 100)) {
+			uint32_t chance;
+			chance = util_math_rand32_max(100);
+			if (creature_data.percent >= chance) {
 				return creature_id;
+			} else {
+				return 0;
 			}
 		} else {
+			mbp_ui_error("Could not parse creature percentage.");
 			return 0;
 		}
 	}
+	mbp_ui_error("Too many tries to pick creature.");
+
 	return 0;
 }
 
 void capture_process_heard(char *name) {
+	// Called when we've received a creature packet. If we haven't captured this creature, then
+	// trigger the display of a notification, allowing the user to capture the creature. We do not block here,
+	// so that we return to the ble advertising receive handler.
 	uint16_t creature_id;
+
+	// return if we're not ready to present another notification
+	if (notifications_state.state != NOTIFICATIONS_STATE_IDLE) {
+		return;
+	}
+
 	// parse the creature index from the name field
 	creature_id = __decode_name(name);
-	if (creature_id != 0) {
-		// make sure we're not already presenting a notification
-		// TODO we need a mutex or semaphore here
-		//if ((notifications_state.requested == true) || (notifications_state.status )) {
-		//	// TODO
-		//}
-		// notify the user that a creature is in the area
+	if (creature_id != 0) { // TODO Change this to test for the possible range of creatures we have on SD card
+		if (mbp_state_captured_is_captured(creature_id)) {
+			// Don't notify more than once for each creature, because sending lasts a while for each one
+			return;
+		}
 		notifications_state.p_notification_callback = capture_notification_callback;
-		notifications_state.timeout = CAPTURE_DISPLAY_TIME_LENGTH;
-		// TODO change the notification LED style based on whether we've seen this creature before
-		// or maybe how rare it is
+
+		// possibly TODO make changes based on how rare it is
+		notifications_state.timeout = CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH;
 		notifications_state.led_style = LED_STYLE_RED_FLASH;
+
 		// Creature filenames are "nnnn.RAW", based on the creature number
 		sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
-		notifications_state.status = 0;
-		notifications_state.requested = true; // this triggers either background or bling loops to pick this up
-		while (notifications_state.requested == true); // spin until we know that the request has been picked up
-		while (notifications_state.status == 0); // spin until we get a result
-		switch (notifications_state.status) {
-		case BUTTON_MASK_SPECIAL:
-			// the notification timed out
-			break;
-		case BUTTON_MASK_UP:
-		case BUTTON_MASK_DOWN:
-		case BUTTON_MASK_LEFT:
-		case BUTTON_MASK_RIGHT:
-		case BUTTON_MASK_ACTION:
-			// Count anything else as accepting the capture
-			// TODO complete the capture
-			break;
-		default:
-			break;
-		}
-		// Clear up any state
-		notifications_state.status = 0;
-
+		notifications_state.user_data = creature_id;
+		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
 
 	} else {
 		// TODO This shouldn't happen

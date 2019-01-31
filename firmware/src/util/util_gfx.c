@@ -562,7 +562,7 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 			}
 
 			// Check to see if a notification needs to be displayed
-			if (notifications_state.requested) {
+			if (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) {
 				loop = false;
 				button = BUTTON_MASK_SPECIAL;
 				break;
@@ -599,6 +599,7 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 	do {
 		rstat = __util_gfx_draw_raw_file_inner(filename, x, y, w, h, p_frame_callback, loop, data);
 		if (rstat == BUTTON_MASK_SPECIAL) {
+			// Inside the bling look, it was detected that there's a notification pending
 			// TODO Validate that callback pointer
 			// Call the notification callback.
 			notifications_state.p_notification_callback();
