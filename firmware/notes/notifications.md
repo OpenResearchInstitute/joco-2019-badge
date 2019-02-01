@@ -37,12 +37,14 @@ If a hello is displayed, it is done in a blocking manner from here, and after th
 
 ## Custom (Menu-Selected) Bling
 
-Menu selected bling is "custom" bling. Background LED bling is always stopped before th emenu selections are made for running custom bling. Most of the bling selection is done in menus in bling/mbp_custom_bling.c, although the funnctions called for each bling are in bling/mbp_bling.c.
+Menu selected bling is "custom" bling. Background LED bling is always stopped before th emenu selections are made for running custom bling. Most of the bling selection is done in menus in bling/mbp_custom_bling.c, although the functions called for each bling are in bling/mbp_bling.c.
 
 The majority of custom bling displays are started by simple_filebased_bling(), which simply loops through a RAW file for the LCD and one for the LED patterns.
 
 Eventually, this results in a call to util_gfx_draw_raw_file(), from util/util_gfx.c, which accepts a file name for a .RAW file to display on the LCD, and a callback, which is called every frame.
 Each time through the frame loop in util_gfx_draw_raw_file(), the buttons are tested and if any button has been pressed, control is returned to the caller.
+
+The boolean 'blinging' is set while a bling is being displayed
 
 ## Notifications
 

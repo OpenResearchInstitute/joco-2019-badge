@@ -34,6 +34,7 @@ typedef struct {
 } creature_data_t;
 
 APP_TIMER_DEF(m_capture_timer);
+APP_TIMER_DEF(m_notify_check_timer);
 
 void __encode_name(uint16_t cid, char *name) {
 	if (cid > 9999) {
@@ -104,6 +105,7 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 static void __capture_timer_handler(void * p_data) {
 	creature_data_t creature_data;
 	bool ok;
+	
 	// This should fire once per second. It handles two tasks
 	if (capture_state.initialized) {
 		// If it's time to send a random creature, do that
@@ -150,12 +152,30 @@ static void __capture_timer_handler(void * p_data) {
 	app_sched_execute();
 }
 
+static void __notify_check_timer_handler(void * p_data) {
+	//
+	// The only purpose of this timer is to detect that a notification is needed for the case when custom bling
+	// isn't running, and run it here.
+	//
+
+	// make a final check that conditions are ok
+	if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
+		return;
+	}
+	if ((blinging) || (!mbp_background_led_running())) {
+		return;
+	}
+	notifications_state.p_notification_callback();
+
+	app_sched_execute();
+}
+
 void capture_init(void) {
 	capture_state.initialized = false;
 	capture_state.sending = false;
 	capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
 	capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
-		
+
 	// Find out how many creature we have available to send
 	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
 	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
@@ -173,12 +193,23 @@ void capture_init(void) {
 	}
 
 	uint32_t err_code;
+	uint32_t ticks;
+
 	err_code = app_timer_create(&m_capture_timer, APP_TIMER_MODE_REPEATED, __capture_timer_handler);
 	APP_ERROR_CHECK(err_code);
 
-	uint32_t ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
+	ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
 	err_code = app_timer_start(m_capture_timer, ticks, NULL);
 	APP_ERROR_CHECK(err_code);
+
+	err_code = app_timer_create(&m_notify_check_timer, APP_TIMER_MODE_REPEATED, __notify_check_timer_handler);
+	APP_ERROR_CHECK(err_code);
+
+	ticks = APP_TIMER_TICKS(NOTIFY_CHECK_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
+	err_code = app_timer_start(m_notify_check_timer, ticks, NULL);
+	APP_ERROR_CHECK(err_code);
+
+
 }
 
 bool capture_is_sending() {
@@ -229,26 +260,42 @@ void capture_process_heard(char *name) {
 		return;
 	}
 
-	// parse the creature index from the name field
-	creature_id = __decode_name(name);
-	if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
-		if (mbp_state_captured_is_captured(creature_id)) {
-			// Don't notify more than once for each creature, because sending lasts a while for each one
-			return;
+	// We want to display a notification only if the background LED bling is
+	// displaying, or if there's a custom bling playing.
+	// These two conditions are mutually exclusive, since custom bling is started
+	// through a menu choice, and background LED bling is disabled when any submenu
+	// is entered.
+	//
+	// We can tell if background bling is running with mbp_background_led_running().
+	// If it is, it'll get picked up by the timer routine provided here.
+	//
+	// We can tell whether custom bling is running because the 'blinging' boolean will be true.
+	// There's a 'hook' in that code that checks to see if a notification has been requested (using
+	// notification_state.state == NOTIFICATION_STATE_REQUESTED), and if it has,
+	// then it runs the notification callback.
+
+	if ((blinging) || mbp_background_led_running()) {
+		// parse the creature index from the name field
+		creature_id = __decode_name(name);
+		if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
+			if (mbp_state_captured_is_captured(creature_id)) {
+				// Don't notify more than once for each creature, because sending lasts a while for each one
+				return;
+			}
+			notifications_state.p_notification_callback = capture_notification_callback;
+
+			// possibly TODO make changes in appearance based on how rare it is
+			notifications_state.timeout = CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH;
+			notifications_state.led_style = LED_STYLE_RED_FLASH;
+
+			// Creature filenames are "nnnn.RAW", based on the creature number
+			sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
+			notifications_state.user_data = creature_id;
+			notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
+
+		} else {
+			mbp_ui_error("received invalid creature ID");
 		}
-		notifications_state.p_notification_callback = capture_notification_callback;
-
-		// possibly TODO make changes in appearance based on how rare it is
-		notifications_state.timeout = CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH;
-		notifications_state.led_style = LED_STYLE_RED_FLASH;
-
-		// Creature filenames are "nnnn.RAW", based on the creature number
-		sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
-		notifications_state.user_data = creature_id;
-		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
-
-	} else {
-		mbp_ui_error("received invalid creature ID");
 	}
 }
 

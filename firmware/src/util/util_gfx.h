@@ -75,6 +75,9 @@ typedef struct {
 	int16_t xs, ys, xe, ye;
 } area_t;
 
+extern volatile bool blinging;
+
+
 /**
  * Set the visible area for text cursor for printing text. Any printing outside of it will not be visible
  *
