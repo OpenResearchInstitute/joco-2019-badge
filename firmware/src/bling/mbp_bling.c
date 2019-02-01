@@ -1121,7 +1121,7 @@ bool mbp_notification_led_running() {
 }
 
 void mbp_background_led_start() {
-    if (!m_notification_led_running) {
+    if (m_notification_led_running) {
 	    // just refuse
 	    return;
     } else if (!m_background_led_running) {
@@ -1134,7 +1134,7 @@ void mbp_background_led_start() {
 }
 
 void mbp_notification_led_start() {
-    if (!m_background_led_running) {
+    if (m_background_led_running) {
 	    return; // refuse
     } else if (!m_notification_led_running) {
         //Start up timer for updating the notification LED display

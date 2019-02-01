@@ -36,6 +36,8 @@ typedef struct {
 APP_TIMER_DEF(m_capture_timer);
 APP_TIMER_DEF(m_notify_check_timer);
 
+static char textbuf[40];
+
 void __encode_name(uint16_t cid, char *name) {
 	if (cid > 9999) {
 		cid = 9999;
@@ -68,13 +70,14 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	sprintf(fname, "CAPTURE/%04d.DAT", id);
 	FRESULT result = util_sd_load_file(fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
 	if (result != FR_OK) {
-		mbp_ui_error("Could not read creature data.");
+		sprintf(textbuf, "Could not read creature data: %d", id);
+		mbp_ui_error(textbuf);
 		return false;
 	}
 	// Parse the data file. the name is first and ends in a newline (0x0A)
 	file_data[CAPTURE_MAX_DAT_FILE_LEN] = 0;
 	uint16_t cctr = 0;
-	char *pch = &creature_data->name[0];
+	char *pch = &file_data[0];
 	char *pdst = &creature_data->name[0];
 
 	while ((*pch != 0x0A) && (cctr < CAPTURE_MAX_NAME_LEN)) {
@@ -89,7 +92,8 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	}
 
 	if (cctr >= CAPTURE_MAX_NAME_LEN) {
-		mbp_ui_error("Could not parse creature name.");
+		sprintf(textbuf, "Could not read creature name: %d", id);
+		mbp_ui_error(textbuf);
 		return false;
 	} else {
 		pch++;
@@ -240,7 +244,8 @@ uint16_t __choose_creature(void) {
 				return 0;
 			}
 		} else {
-			mbp_ui_error("Could not parse creature percentage.");
+			sprintf(textbuf, "Could not parse creature percent: %d", creature_id);
+			mbp_ui_error(textbuf);
 			return 0;
 		}
 	}
@@ -294,7 +299,8 @@ void capture_process_heard(char *name) {
 			notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
 
 		} else {
-			mbp_ui_error("received invalid creature ID");
+			sprintf(textbuf, "RX invalid creature ID: %d", creature_id);
+			mbp_ui_error(textbuf);
 		}
 	}
 }
