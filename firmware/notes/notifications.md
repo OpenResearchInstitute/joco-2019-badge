@@ -9,8 +9,6 @@
 * A "custom" bling Selected from a menu (displays until exited)
 * A "Notification", which displays until it times out or a buntton is pressed. These display no matter what else is displaying (not during the boot sequence)
 
-
-
 ## Background Bling
 
 Background LED bling runs at all times unless something stops it (games typically stop it). Anything that stops the LED background bling restarts it when finished.

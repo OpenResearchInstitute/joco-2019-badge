@@ -1,19 +1,19 @@
 JoCo 2019 Gameplay
 
-The gameplay is a "capture creatures" game similar to Pokemon Go. The definition of precisely what a 'creature' is remains abstract so the gameplay could be reused for othe rbadge projects.
+The gameplay is a "capture creatures" game similar to Pokemon Go. The definition of precisely what a 'creature' is remains abstract so the gameplay could be reused for other badge projects.
 
 === The user experience ===
 
 Occasionally a random creature will be in the area of your badge.
-When this happens, your badge flashes a special bling.
+When this happens, your badge flashes a notification.
 
-If you have already "captured"  a creature, then is flashes a brief (3 seconds?) "hello" to that creature, with a single color greed LED pattern. This 'hello' i dsubject to the same timing and presentation restrictions as the hello displays for other badge types.
+If you have already "captured"  a creature, then is flashes a brief (3 seconds?) "hello" to that creature, with a single color greed LED pattern. This 'hello' is subject to the same timing and presentation restrictions as the hello displays for other badge types. [NOTE: This is not implemented yet. Adding it would require adding heard creatures to the list of heard badges, which isn't done now]
 
-If you have NOT captured that creature, then the badge flashes a long bling alert pattern (1 minute ???). This is a very flashy pattern on the LEDs and the creature is displayed on the LCD along with the rarity and number of points gained by capturing it.
+If you have NOT captured that creature, then the badge flashes a notification for CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH seconds (now 40 seconds). This is a very flashy pattern on the LEDs and the creature is displayed on the LCD along with the rarity and number of points gained by capturing it.
 
-During the alert pattern display, the user can press a button (the action button?) and capture that creature.
+During the notification, the user can press any button and capture that creature.
 
-In the badge menu, there is a new selection that displays a scrolled list of all creatures captured. The existing "Score" menu choice shows how many creatures have been captured and the total points.
+In the badge menu, there is a new selection that displays a scrolled list of all creatures captured. The existing "Score" menu choice shows how many creatures have been captured and the total points. [NOTE: This is not implemented yet]
 
 What the 'creatures' are is TBD but must be decided soon. Possibilities include:
 Different famous people (artists, scientists, inventors)
@@ -23,21 +23,30 @@ Suggestions for others are welcome but they must be easy to gatehr.
 
 === Implementation ===
 
-In order to identify creatures with a minimum of data, each creature is assigned an ID - an index starting at 1 and as high as the number of bits allocated will allow. 256 may be enough, and will fit into a single byte.
+In order to identify creatures with a minimum of data, each creature is assigned an ID - an index starting at 1 and as high as the number of bits allocated will allow. 256 may be enough, and will fit into a single byte. This is configurable in the code, but limited to a maximum index of 9999.
 
-Every badge is capable of making a creature appear. This is done by inserting the creature ID into the BLE advertising packet that the badge sends. When this is done, the creature is included in advertising packeets for some persiod (10 seconds), and then no longer sent. Each badge will only send these creature IDs very rarely, say every 20 minutes.
+Every badge is capable of making a creature appear. This is done by replacing the normal BLE advertising data from the badge with special 'creature' data. When this is done, the creature is included in advertising packets for some period, and then no longer sent. Each badge will only send these creature IDs rarely. The following options control this:
 
-Each SD card has a game/creature directory with files for each creature. The file base name is the creature index, and the extension indicates the type of data it contains.
+CAPTURE_SENDING_INTERVAL
+CAPTURE_SENDING_INTERVAL_JITTER (used to add randomness to the interval)
+CAPTURE_SENDING_LENGTH (How many seconds the creature data is sent for)
+
+
+The SD card has a game/creature directory with files for each creature. The file base name is the creature index, and the extension indicates the type of data it contains.
 Each base name is four digits.
 
 nnnn.RAW - an image of the creature
-nnnn.DAT - a structured file containing:
-    a text name of the creature (10 characters max)
-    a probablility from 0-100 that this creature is broadcast. This is applied after a creature is randomly selected from the list of all creatures. If a check against this probability fails, th ecreature is skipped, and another one is selected at random from among all creatures.
+nnnn.DAT - a text file containing:
+    a text name of the creature (10 characters max), followed by the value 0x0A (line feed)
+    an ascii numerical probablility from 0-100 that this creature is broadcast. This is applied after a creature is randomly selected from the list of all creatures. If a check against this probability fails, the creature is skipped, and another one is selected at random from among all creatures.
 
-The score for each creature can be calculated from a base score and some factor times the rarity multiplier
+The score for each creature is calculated from a base score and some factor times the rarity multiplier. These values are configurable, with current values of:
+POINTS_4_CAPTURE 100
+POINTS_4_RARITY  20 // Max points miltiplier available for rarity
+The calculation is currently points = POINTS_4_CAPTURE + ((100 - probability) * POINTS_4_RARITY)
 
-Occasionally (every 20 minutes?) each badge will:
+
+Occasionally each badge will:
 1. select a random number between 1 and the max creature ID
 2. read the DAT file for that creature.
 3. If there is a rarity multiplier for that creature:
@@ -46,20 +55,25 @@ Occasionally (every 20 minutes?) each badge will:
 4. Begin sending that creature ID in advertising packets and set the timer to end that
 5. Trigger it's own 'creature seen' logic so that the sending badge also can capture it.
 
-The time until the next creature broadcast should be randomized at badge powerup to a value between 0 and the time period. Perhaps the time period should be randomized somewhat also.
-
 Each badge will need to store the following state information about the game:
 
-* A list of creatures which have been captured
-* The total Score (this can be calculated from the list and rarity multipliers)
-The best way to store the list of creatures is TBD but could be:
-    * A bitfield, in the badge state data
-    * In the creature DAT file in the game directory
-    * By adding a new file per capture in the game directory as a flag.
+* A bitmap indicating which creatures have been captured
+* The total Score (This also has contributions from other games, etc)
+
+Notifications:
+
+Significant code was added to support notifications. These are only displayed when either background LED bling is running, or when custom bling is being played. This has the desireable side effect of not popping up notifications when menus are displayed or when games are being played on the LCD. There is more information about how notifications work in the notifications.md file.
+
+Also, I realized that I don't think that the top level menu will be redisplayed is background bling is running at the top menu, so this will need to be looked at.
+
+
+[NOTE: None of the following was implemented. Currently, creatures are processed and notifications opened as soon as they're heard, and only if they haven't been previously captured.]
+
+Implementation of this sort of queuing could be done using the notify_check_timer in the capture game code.
+
 
 The badge must be capable of 'hearing' more than one creature at a time amd allowing the user to capture them. To support this:
 When a creature is heard, it will be added to a list (the neighbor list?) for a period TBD.
 The "creature present" bling will always display the rarest creature that's available. If it changes in the middle of displaying a creature, then the old creature remains on the list, and the countdown time to capture is held and reset to the max when the bling is displayed again.
-When a creature is captured by th euser pressing the action button, the next most rare uncaptured creature in the list will be displayed, if there are any.
+When a creature is captured by the user pressing the action button, the next most rare uncaptured creature in the list will be displayed, if there are any.
 
-During the bling for uncaptured creates being present, "hello" displays for other badges and previously captured badges are suppressed. So are any other displays.
