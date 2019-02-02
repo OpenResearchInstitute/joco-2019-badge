@@ -20,6 +20,9 @@
 #ifndef CAPTURE_GAME_H_
 #define CAPTURE_GAME_H_
 
+// Testing
+#define USE_SEQUENTIAL_CREATURES
+
 // Times are in seconds
 #define MINUTES_10 600
 #define MINUTES_20 1200
@@ -64,11 +67,5 @@ extern bool capture_is_sending(void);
 
 // handle hearing a creature advertisement
 extern void capture_process_heard(char *name);
-
-// handle starting a cycle of sending creature advertisements
-extern void capture_send_creature(void);
-
-// handle cleaning up after a cycle of sending creature advertisements
-extern void capture_stop_send_creature();
 
 #endif /* CAPTURE_GAME_H_ */

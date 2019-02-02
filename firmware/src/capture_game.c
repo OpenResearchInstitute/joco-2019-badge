@@ -24,6 +24,7 @@ typedef struct {
 	bool        initialized;
 	bool	    sending;
 	uint16_t    max_index;
+	uint16_t    c_index;
 	uint16_t    countdown;
 } capture_state_t;
 capture_state_t	capture_state;
@@ -33,10 +34,11 @@ typedef struct {
 	uint8_t     percent;
 } creature_data_t;
 
+uint16_t __choose_creature(void);
+
+
 APP_TIMER_DEF(m_capture_timer);
 APP_TIMER_DEF(m_notify_check_timer);
-
-static char textbuf[40];
 
 void __encode_name(uint16_t cid, char *name) {
 	if (cid > 9999) {
@@ -62,6 +64,24 @@ uint16_t __rarity_to_points(uint8_t percent) {
 	return (POINTS_4_CAPTURE + ((100 - percent) * POINTS_4_RARITY));
 }
 
+void __write_bad_file_flag(uint16_t index, char *text) {
+	char fname[20];
+	FIL file;
+	UINT count;
+	FRESULT result;
+
+	sprintf(fname, "CAPTURE/%04d.BAD", index);
+	result = f_open(&file, fname, FA_CREATE_NEW | FA_WRITE);
+	if (result != FR_OK) {
+		// probably FR_EXIST, but we ignore all errors
+		return;
+	}
+
+	result = f_write(&file, (void *) text, strlen(text), &count); // ignore result
+
+	result = f_close(&file);
+}
+
 bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
 	char fname[20];
@@ -70,8 +90,7 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	sprintf(fname, "CAPTURE/%04d.DAT", id);
 	FRESULT result = util_sd_load_file(fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
 	if (result != FR_OK) {
-		sprintf(textbuf, "Could not read creature data: %d", id);
-		mbp_ui_error(textbuf);
+		__write_bad_file_flag(id, "read");
 		return false;
 	}
 	// Parse the data file. the name is first and ends in a newline (0x0A)
@@ -92,8 +111,7 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	}
 
 	if (cctr >= CAPTURE_MAX_NAME_LEN) {
-		sprintf(textbuf, "Could not read creature name: %d", id);
-		mbp_ui_error(textbuf);
+		__write_bad_file_flag(id, "name");
 		return false;
 	} else {
 		pch++;
@@ -108,6 +126,7 @@ bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
 
 static void __capture_timer_handler(void * p_data) {
 	creature_data_t creature_data;
+	char name[SETTING_NAME_LENGTH];
 	bool ok;
 	
 	// This should fire once per second. It handles two tasks
@@ -115,15 +134,38 @@ static void __capture_timer_handler(void * p_data) {
 		// If it's time to send a random creature, do that
 		if (--capture_state.countdown == 0) {
 			if (!capture_state.sending) {
-				// Start sending
-				capture_send_creature();
+				// Set up to send some advertising packets identifying as a creature, instead of our normal info
+				// Select a creature ID to send
+				do {
+					capture_state.c_index = __choose_creature();
+				} while (capture_state.c_index == 0);
+
+				// Disable advertising
+				util_ble_off();
+				// Encode it into the name field
+				__encode_name(capture_state.c_index, name);
+				util_ble_name_set(name);
+				// Change the Appearance ID to make this a 'creature' advertisement
+				util_ble_appearance_set(APPEARANCE_ID_CREATURE);
+				// Enable advertising
+				capture_state.sending = true;
+				util_ble_on();
 				// Set countdown so we stop sending
-				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_LENGTH);
+				capture_state.countdown = CAPTURE_SENDING_LENGTH;
 			} else {
 				// Stop sending
-				capture_stop_send_creature();
+				// Disable advertising
+				util_ble_off();
+				// Restore the name in the advertisement from the state information
+				mbp_state_name_get(name);
+				util_ble_name_set(name);
+				// restore the appearance ID to BADGE_APPEARANCE
+				util_ble_appearance_set(BADGE_APPEARANCE);
+				// Enable advertising
+				capture_state.sending = false;
+				util_ble_on();
 				// Set countdown to start next sending time
-				capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
+				capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
 				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
 			}
 		}
@@ -192,7 +234,7 @@ void capture_init(void) {
 	if (num_creatures > (CAPTURE_MAX_INDEX + 1)) {
 		return;
 	} else {
-		capture_state.max_index = (uint16_t) num_creatures - 1;
+		capture_state.max_index = (uint16_t) num_creatures;
 		capture_state.initialized = true;
 	}
 
@@ -221,15 +263,26 @@ bool capture_is_sending() {
 }
 
 uint16_t __choose_creature(void) {
+#ifdef USE_SEQUENTIAL_CREATURES
+	static uint16_t seq_id = 1;
+#endif
+
 	uint8_t ttl = 50;
 	bool creature_found = false;
 	uint16_t creature_id = 0; // 0 is invalid
 	creature_data_t creature_data;
 	while ((!creature_found) && (--ttl > 0)) {
+#ifdef USE_SEQUENTIAL_CREATURES
+		creature_id = seq_id++;
+		if (seq_id > capture_state.max_index) {
+			seq_id = 1;
+		}
+
+#else
 		// Generate a random number in the range of 1 <= index <= max_index
 		creature_id = util_math_rand16_max(capture_state.max_index-1);
 		creature_id++; // because 0 is invalid
-
+#endif
 		bool ok = __read_creature_data(creature_id, &creature_data);
 		if (!ok) {
 			return 0;
@@ -244,12 +297,10 @@ uint16_t __choose_creature(void) {
 				return 0;
 			}
 		} else {
-			sprintf(textbuf, "Could not parse creature percent: %d", creature_id);
-			mbp_ui_error(textbuf);
+			__write_bad_file_flag(creature_id, "percent");
 			return 0;
 		}
 	}
-	mbp_ui_error("Too many tries to pick creature.");
 
 	return 0;
 }
@@ -299,44 +350,6 @@ void capture_process_heard(char *name) {
 			notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
 
 		} else {
-			sprintf(textbuf, "RX invalid creature ID: %d", creature_id);
-			mbp_ui_error(textbuf);
 		}
 	}
 }
-
-void capture_send_creature(void) {
-	char name[SETTING_NAME_LENGTH];
-	uint16_t creature_id;
-	// Set up to send some advertising packets identifying as a creature, instead of our normal info
-	// Select a creature ID to send
-	creature_id = __choose_creature();
-	if (creature_id == 0) {
-		return;
-	}
-
-	// Disable advertising
-	util_ble_off();
-	// Encode it into the name field
-	__encode_name(creature_id, name);
-	// Change the Appearance ID to make this a 'creature' advertisement
-	util_ble_appearance_set(APPEARANCE_ID_CREATURE);
-	// Enable advertising
-	capture_state.sending = true;
-	util_ble_on();
-}
-
-void capture_stop_send_creature() {
-	char name[SETTING_NAME_LENGTH];
-	// Disable advertising
-	util_ble_off();
-	// Restore the name in the advertisement from the state information
-	mbp_state_name_get(name);
-	util_ble_name_set(name);
-	// restore the appearance ID to BADGE_APPEARANCE
-	util_ble_appearance_set(BADGE_APPEARANCE);
-	// Enable advertising
-	capture_state.sending = false;
-	util_ble_on();
-}
-
