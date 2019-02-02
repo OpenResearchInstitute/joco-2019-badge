@@ -69,7 +69,7 @@
 
 #define APPEARANCE_ID_ANDNXOR_DC25				0x19DC
 #define APPEARANCE_ID_STANDARD_DC26				0x26DC
-#define APPEARANCE_ID_CREATURE                                  0xCC19
+#define APPEARANCE_ID_CREATURE                                  0x01DC
 
 // This sets the appearance to one of the above
 #define BADGE_APPEARANCE APPEARANCE_ID_STANDARD_DC26
@@ -82,6 +82,9 @@ extern uint32_t util_ble_disconnect();
 extern void util_ble_init();
 extern void util_ble_name_get(char *name);
 extern void util_ble_name_set(char *name);
+#if INCLUDE_CAPTURE
+extern void util_ble_name_set_special(char *name, uint16_t len);
+#endif
 extern void util_ble_appearance_set(uint16_t appearance);
 extern void util_ble_flags_set(void);
 extern uint32_t util_ble_nus_send(char *p_string, uint16_t length);

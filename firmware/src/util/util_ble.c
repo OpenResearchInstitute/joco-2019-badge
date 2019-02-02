@@ -338,7 +338,7 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 	// appearance values. (DEFCON standard, not BLE standard!)
 
 	if (badge.appearance == APPEARANCE_ID_ANDNXOR_DC25 ||
-#if ENABLE_CAPTURE
+#if INCLUDE_CAPTURE
 	        badge.appearance == APPEARANCE_ID_CREATURE ||
 #endif
 	        badge.appearance == APPEARANCE_ID_STANDARD_DC26) {
@@ -393,15 +393,14 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 					// Synthesize a fake device_id from the GAP address
 					badge.device_id = p_report->peer_addr.addr[1] << 8 | p_report->peer_addr.addr[0];
 					break;
+			}
 #if INCLUDE_CAPTURE
-			}
 		} else if (badge.appearance == APPEARANCE_ID_CREATURE) {
-				// We've received an indication that there's a 'creature' in the area that can be captured.
-				// All we care about is the creature I(index), which is encoded in the name field
-				capture_process_heard(badge.name);
-		}
-#else
-			}
+			// We've received an indication that there's a 'creature' in the area that can be captured.
+			// All we care about is the creature I(index), which is encoded in the name field
+			// xyzzy
+			capture_process_heard(badge.name);
+#endif
 	        }
 
 		// Process the RSSI for meter display
@@ -415,7 +414,6 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 										badge.flags,
 										badge.rssi);
 
-#endif
 	}	/* Done with processing advertisement from a badge. */
 
 	// Handle beacon scanning
@@ -913,10 +911,20 @@ void util_ble_name_set(char *name) {
 	ble_advdata_set(&m_adv_data, NULL);
 }
 
+#if INCLUDE_CAPTURE
+void util_ble_name_set_special(char *name, uint16_t len) {
+	ble_gap_conn_sec_mode_t sec_mode;
+	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&sec_mode);
+	APP_ERROR_CHECK(sd_ble_gap_device_name_set(&sec_mode, (const uint8_t * ) name, len));
+	ble_advdata_set(&m_adv_data, NULL);
+}
+#endif
+
 void util_ble_appearance_set(uint16_t appearance) {
 	uint32_t err_code;
 	err_code = sd_ble_gap_appearance_set(appearance);
 	APP_ERROR_CHECK(err_code);
+	ble_advdata_set(&m_adv_data, NULL);
 }
 
 void util_ble_flags_set(void) {

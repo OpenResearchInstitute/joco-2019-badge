@@ -45,10 +45,10 @@
 // Sending parameters
 // Remember when setting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
 // an opportunity at least this often. 
-#define CAPTURE_FAST_TEST
+//#define CAPTURE_FAST_TEST
 #ifdef CAPTURE_FAST_TEST
-#define CAPTURE_SENDING_INTERVAL 120
-#define CAPTURE_SENDING_INTERVAL_JITTER 60
+#define CAPTURE_SENDING_INTERVAL 60
+#define CAPTURE_SENDING_INTERVAL_JITTER 0
 #define CAPTURE_SENDING_LENGTH 6
 #else
 #define CAPTURE_SENDING_INTERVAL MINUTES_60

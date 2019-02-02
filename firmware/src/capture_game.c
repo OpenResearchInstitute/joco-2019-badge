@@ -140,30 +140,39 @@ static void __capture_timer_handler(void * p_data) {
 					capture_state.c_index = __choose_creature();
 				} while (capture_state.c_index == 0);
 
-				// Disable advertising
-				util_ble_off();
 				// Encode it into the name field
 				__encode_name(capture_state.c_index, name);
-				util_ble_name_set(name);
+
+				// Disable advertising
+				util_ble_off();
+
 				// Change the Appearance ID to make this a 'creature' advertisement
 				util_ble_appearance_set(APPEARANCE_ID_CREATURE);
+
+				// The field is seven characters long, and has leading and trailing nulls
+				util_ble_name_set_special(name, 7);
+
 				// Enable advertising
 				capture_state.sending = true;
 				util_ble_on();
+
 				// Set countdown so we stop sending
 				capture_state.countdown = CAPTURE_SENDING_LENGTH;
 			} else {
-				// Stop sending
 				// Disable advertising
 				util_ble_off();
+
 				// Restore the name in the advertisement from the state information
 				mbp_state_name_get(name);
 				util_ble_name_set(name);
+
 				// restore the appearance ID to BADGE_APPEARANCE
 				util_ble_appearance_set(BADGE_APPEARANCE);
+
 				// Enable advertising
 				capture_state.sending = false;
 				util_ble_on();
+
 				// Set countdown to start next sending time
 				capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
 				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
@@ -222,7 +231,7 @@ void capture_init(void) {
 	capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
 	capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
 
-	// Find out how many creature we have available to send
+	// Find out how many creatures we have available to send
 	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
 	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
 	if (result != FR_OK) {
