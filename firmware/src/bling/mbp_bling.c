@@ -1070,8 +1070,8 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
     }
 }
 
-#define NOTIF_ON_COUNT 5 // simple blink
-#define NOTIF_END_COUNT 10
+#define NOTIF_ON_COUNT 20 // simple blink
+#define NOTIF_END_COUNT 40
 static void __notification_led_sch_handler(void * p_event_data, uint16_t event_size) {
 	// Currently called 10x per second
 	static int bg_cycle_count = 0;
