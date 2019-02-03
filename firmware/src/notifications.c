@@ -31,6 +31,7 @@ void notifications_init() {
 }
 
 void capture_notification_callback() {
+    // This should only be called when it is OK to display a notification.
 
     //buffer for formatting text
     char temp[32];
@@ -46,6 +47,7 @@ void capture_notification_callback() {
     if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
 	    return; // This is an error
     }
+
     notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
 
     bool ok = read_creature_data(notifications_state.user_data, &creature_data);

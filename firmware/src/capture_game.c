@@ -321,42 +321,25 @@ void capture_process_heard(char *name) {
 		return;
 	}
 
-	// We want to display a notification only if the background LED bling is
-	// displaying, or if there's a custom bling playing.
-	// These two conditions are mutually exclusive, since custom bling is started
-	// through a menu choice, and background LED bling is disabled when any submenu
-	// is entered.
-	//
-	// We can tell if background bling is running with mbp_background_led_running().
-	// If it is, it'll get picked up by the timer routine provided here.
-	//
-	// We can tell whether custom bling is running because the 'blinging' boolean will be true.
-	// There's a 'hook' in that code that checks to see if a notification has been requested (using
-	// notification_state.state == NOTIFICATIONS_STATE_REQUESTED), and if it has,
-	// then it runs the notification callback.
-
-	if ((blinging) || mbp_background_led_running()) {
-		// parse the creature index from the name field
-		creature_id = decode_creature_name(name);
-		if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
+	// parse the creature index from the name field
+	creature_id = decode_creature_name(name);
+	if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
 #if ! defined (DEBUG_CAPTURE_ALWAYS_SCORE)
-			if (mbp_state_captured_is_captured(creature_id)) {
-				// Don't notify more than once for each creature, because sending lasts a while for each one
-				return;
-			}
-#endif
-			notifications_state.p_notification_callback = capture_notification_callback;
-
-			// possibly TODO make changes in appearance based on how rare it is
-			notifications_state.timeout = CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH;
-			notifications_state.led_style = LED_STYLE_RED_FLASH;
-
-			// Creature filenames are "nnnn.RAW", based on the creature number
-			sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
-			notifications_state.user_data = creature_id;
-			notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
-
-		} else {
+		if (mbp_state_captured_is_captured(creature_id)) {
+			// Don't notify more than once for each creature, because sending lasts a while for each one
+			return;
 		}
+#endif
+		notifications_state.p_notification_callback = capture_notification_callback;
+
+		// possibly TODO make changes in appearance based on how rare it is
+		notifications_state.timeout = CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH;
+		notifications_state.led_style = LED_STYLE_RED_FLASH;
+
+		// Creature filenames are "nnnn.RAW", based on the creature number
+		sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
+		notifications_state.user_data = creature_id;
+		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
+
 	}
 }
