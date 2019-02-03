@@ -21,7 +21,8 @@
 #define CAPTURE_GAME_H_
 
 // Testing
-#define USE_SEQUENTIAL_CREATURES
+#define DEBUG_USE_SEQUENTIAL_CREATURES
+#define DEBUG_CAPTURE_ALWAYS_SCORE
 
 // Times are in seconds
 #define MINUTES_10 600
@@ -56,16 +57,20 @@
 #define CAPTURE_SENDING_LENGTH 6
 #endif
 
+typedef struct {
+	char        name[CAPTURE_MAX_NAME_LEN + 1];
+	uint8_t     percent;
+} creature_data_t;
+
 // receiving and display parameters
 #define CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH 40 // Seconds
 #define CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH 5 // Seconds
 
-// Initialize anything
+extern uint16_t decode_creature_name(char *);
+extern uint16_t rarity_to_points(uint8_t);
+extern bool read_creature_data(uint16_t, creature_data_t *);
 extern void capture_init(void);
-
 extern bool capture_is_sending(void);
-
-// handle hearing a creature advertisement
 extern void capture_process_heard(char *name);
 
 #endif /* CAPTURE_GAME_H_ */

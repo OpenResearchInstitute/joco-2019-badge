@@ -37,12 +37,24 @@ void capture_notification_callback() {
 
     bool redraw = true;
     bool loop = false;
+    bool background_was_running;
 
+    creature_data_t creature_data;
+
+    
     // make sure we have a request pending
     if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
 	    return; // This is an error
     }
     notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
+
+    bool ok = read_creature_data(notifications_state.user_data, &creature_data);
+    if (!ok) {
+	    // not much we can do, so don't display the notification
+	    notifications_state.button_value = BUTTON_MASK_SPECIAL;;
+	    notifications_state.state = NOTIFICATIONS_STATE_COMPLETE;
+	    return;
+    }
 
     while (1) {
 	if (redraw || !util_gfx_is_valid_state()) {
@@ -54,19 +66,16 @@ void capture_notification_callback() {
 	    mbp_ui_cls();
 
 	    // TODO Load the graphic file as background
-	    
+
+	    sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
+	    util_gfx_draw_raw_file(temp, 0, 0, 128, 128, NULL, false, NULL);
 
 	    //Print their name
 	    util_gfx_set_font(FONT_LARGE);
 	    util_gfx_set_color(COLOR_WHITE);
 	    util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
-	    mbp_state_name_get(temp);
-	    util_gfx_print(temp);
+	    util_gfx_print(creature_data.name);
 
-	    util_gfx_set_color(COLOR_LIGHTBLUE);
-	    strcpy(temp, "A NOTIFICATION");
-	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 26);
-	    util_gfx_print(temp);
 	    if (mbp_notification_led_running()) {
 	        strcpy(temp, "REENTERED");
 	        util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 52);
@@ -75,12 +84,15 @@ void capture_notification_callback() {
 
 	    //Print points
 	    util_gfx_set_color(COLOR_RED);
-	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 95);
-	    util_gfx_print("Name:");
-
-	    sprintf(temp, "    %u", mbp_state_score_get());
+	    sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
 	    util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 110);
 	    util_gfx_print(temp);
+
+	    background_was_running = mbp_background_led_running();
+
+	    mbp_background_led_stop();
+
+	    mbp_notification_led_start();
 
 	    redraw = false;
 	    loop = true;
@@ -88,13 +100,6 @@ void capture_notification_callback() {
 
 	//validate screen state
 	util_gfx_validate();
-
-
-	bool background_was_running = mbp_background_led_running();
-
-	mbp_background_led_stop();
-
-	mbp_notification_led_start();
 
 	// Spin until we time out or the user presses a button
 	uint32_t end_time = util_millis() + (notifications_state.timeout * 1000);

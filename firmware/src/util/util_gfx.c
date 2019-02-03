@@ -562,8 +562,8 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 				break;					//Quit the for loop
 			}
 
-			// Check to see if a notification needs to be displayed
-			if (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) {
+			// Check to see if a notification needs to be displayed, but only if we're looping 
+			if (loop && (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED)) {
 				loop = false;
 				button = BUTTON_MASK_SPECIAL;
 				break;

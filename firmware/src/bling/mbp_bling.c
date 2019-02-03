@@ -1070,38 +1070,41 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
     }
 }
 
-#define NOTIF_ON_COUNT 2 // simple blink
-#define NOTIF_END_COUNT 5
+#define NOTIF_ON_COUNT 5 // simple blink
+#define NOTIF_END_COUNT 10
 static void __notification_led_sch_handler(void * p_event_data, uint16_t event_size) {
 	// Currently called 10x per second
-    static int bg_cycle_count = 0;
-    uint32_t led_color;
+	static int bg_cycle_count = 0;
+	uint32_t led_color;
 
-    switch (notifications_state.led_style) {
-    case LED_STYLE_RED_FLASH:
-	    led_color = LED_COLOR_RED;
-    case LED_STYLE_GREEN_FLASH:
-	    led_color = LED_COLOR_GREEN;
-    default:
-	    led_color = LED_COLOR_PURPLE; // unexpected
-    }
+	switch (notifications_state.led_style) {
+	case LED_STYLE_RED_FLASH:
+		led_color = LED_COLOR_RED;
+		break;
+	case LED_STYLE_GREEN_FLASH:
+		led_color = LED_COLOR_GREEN;
+		break;
+	default:
+		led_color = LED_COLOR_WHITE; // unexpected
+		break;
+	}
 
-    if (bg_cycle_count < NOTIF_ON_COUNT) {
-	    led_color = LED_COLOR_BLACK;
-    }
+	if (bg_cycle_count < NOTIF_ON_COUNT) {
+		led_color = LED_COLOR_BLACK;
+	}
 
-    for (uint8_t i = 0; i < LED_COUNT; i++) {
-        util_led_set_rgb(i, led_color);
-    }
+	for (uint8_t i = 0; i < LED_COUNT; i++) {
+		util_led_set_rgb(i, led_color);
+	}
 
-    if (++bg_cycle_count > NOTIF_END_COUNT) {
-        bg_cycle_count = 0;
-    }
+	if (++bg_cycle_count >= NOTIF_END_COUNT) {
+		bg_cycle_count = 0;
+	}
 
-    util_led_show();
+	util_led_show();
 
-    // If computations are extensive, do them here, not before
-    // updating the display.
+	// If computations are extensive, do them here, not before
+	// updating the display.
 }
 
 static void __background_led_timer_handler(void *p_data) {

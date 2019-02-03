@@ -29,11 +29,6 @@ typedef struct {
 } capture_state_t;
 capture_state_t	capture_state;
 
-typedef struct {
-	char        name[CAPTURE_MAX_NAME_LEN + 1];
-	uint8_t     percent;
-} creature_data_t;
-
 uint16_t __choose_creature(void);
 
 
@@ -50,7 +45,7 @@ void __encode_name(uint16_t cid, char *name) {
 	sprintf(name, "%04d", cid);
 }
 
-uint16_t __decode_name(char *name) {
+uint16_t decode_creature_name(char *name) {
 	if ((name[0] != 0) || (name[1] != 42)) {
 		return 0;
 	}
@@ -60,7 +55,7 @@ uint16_t __decode_name(char *name) {
 	return atoi(&name[2]);
 }
 
-uint16_t __rarity_to_points(uint8_t percent) {
+uint16_t rarity_to_points(uint8_t percent) {
 	return (POINTS_4_CAPTURE + ((100 - percent) * POINTS_4_RARITY));
 }
 
@@ -82,7 +77,7 @@ void __write_bad_file_flag(uint16_t index, char *text) {
 	result = f_close(&file);
 }
 
-bool __read_creature_data(uint16_t id, creature_data_t *creature_data) {
+bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
 	char fname[20];
 
@@ -187,11 +182,12 @@ static void __capture_timer_handler(void * p_data) {
 			case BUTTON_MASK_RIGHT:
 			case BUTTON_MASK_ACTION:
 				// user pressed a button
-				ok = __read_creature_data(notifications_state.user_data, &creature_data);
+				ok = read_creature_data(notifications_state.user_data, &creature_data);
 				if (ok) {
 					// add to score
-					add_to_score(__rarity_to_points(creature_data.percent), creature_data.name);
+					add_to_score(rarity_to_points(creature_data.percent), creature_data.name);
 					mbp_state_capture_set_captured(notifications_state.user_data);
+					mbp_state_capture_count_increment();
 					notifications_state.user_data = 0;
 				}
 				break;
@@ -272,7 +268,7 @@ bool capture_is_sending() {
 }
 
 uint16_t __choose_creature(void) {
-#ifdef USE_SEQUENTIAL_CREATURES
+#ifdef DEBUG_USE_SEQUENTIAL_CREATURES
 	static uint16_t seq_id = 1;
 #endif
 
@@ -281,7 +277,7 @@ uint16_t __choose_creature(void) {
 	uint16_t creature_id = 0; // 0 is invalid
 	creature_data_t creature_data;
 	while ((!creature_found) && (--ttl > 0)) {
-#ifdef USE_SEQUENTIAL_CREATURES
+#ifdef DEBUG_USE_SEQUENTIAL_CREATURES
 		creature_id = seq_id++;
 		if (seq_id > capture_state.max_index) {
 			seq_id = 1;
@@ -292,7 +288,7 @@ uint16_t __choose_creature(void) {
 		creature_id = util_math_rand16_max(capture_state.max_index-1);
 		creature_id++; // because 0 is invalid
 #endif
-		bool ok = __read_creature_data(creature_id, &creature_data);
+		bool ok = read_creature_data(creature_id, &creature_data);
 		if (!ok) {
 			return 0;
 		}
@@ -341,16 +337,18 @@ void capture_process_heard(char *name) {
 
 	if ((blinging) || mbp_background_led_running()) {
 		// parse the creature index from the name field
-		creature_id = __decode_name(name);
+		creature_id = decode_creature_name(name);
 		if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
+#if ! defined (DEBUG_CAPTURE_ALWAYS_SCORE)
 			if (mbp_state_captured_is_captured(creature_id)) {
 				// Don't notify more than once for each creature, because sending lasts a while for each one
 				return;
 			}
+#endif
 			notifications_state.p_notification_callback = capture_notification_callback;
 
 			// possibly TODO make changes in appearance based on how rare it is
-			notifications_state.timeout = CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH;
+			notifications_state.timeout = CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH;
 			notifications_state.led_style = LED_STYLE_RED_FLASH;
 
 			// Creature filenames are "nnnn.RAW", based on the creature number

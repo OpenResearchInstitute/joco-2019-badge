@@ -83,7 +83,7 @@ void game_status_screen() {
 	    //Print their capture count
 	    util_gfx_set_color(COLOR_YELLOW);
 	    sprintf(temp, "Captured: %u", capture_count);
-	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 60);
+	    util_gfx_set_cursor(GAMEPLAY_UI_MARGIN, 46);
 	    util_gfx_print(temp);
 #endif
 #if INCLUDE_QSO
