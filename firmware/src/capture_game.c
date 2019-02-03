@@ -332,7 +332,7 @@ void capture_process_heard(char *name) {
 	//
 	// We can tell whether custom bling is running because the 'blinging' boolean will be true.
 	// There's a 'hook' in that code that checks to see if a notification has been requested (using
-	// notification_state.state == NOTIFICATION_STATE_REQUESTED), and if it has,
+	// notification_state.state == NOTIFICATIONS_STATE_REQUESTED), and if it has,
 	// then it runs the notification callback.
 
 	if ((blinging) || mbp_background_led_running()) {
