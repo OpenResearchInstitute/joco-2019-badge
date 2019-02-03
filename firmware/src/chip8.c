@@ -680,7 +680,6 @@ void chip8_run(chip8_game_t *p_game) {
 
 	//Stop background LED display
 	util_led_clear();
-	mbp_background_led_stop();
 	app_sched_pause();
 
 	uint32_t ticks = APP_TIMER_TICKS(1000 / p_game->hz, UTIL_TIMER_PRESCALER);
@@ -697,7 +696,6 @@ void chip8_run(chip8_game_t *p_game) {
 
 	//restart background LED display
 	app_sched_resume();
-	mbp_background_led_start();
 	util_led_clear();
 	util_gfx_invalidate();
 }

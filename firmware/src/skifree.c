@@ -218,7 +218,6 @@ static void __ski_timer_handler(void *data) {
 void ski() {
 	char *sprite_files[] = { "SKI/LIFT.RAW", "SKI/ROCK.RAW", "SKI/TREE.RAW" };
 
-	mbp_background_led_stop();
 	app_sched_pause();
 
 	//Initialize the skier
@@ -289,5 +288,4 @@ void ski() {
 
 	app_sched_resume();
 	mbp_ui_popup("Ski", "Game Over!");
-	mbp_background_led_start();
 }

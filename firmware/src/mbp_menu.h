@@ -34,6 +34,7 @@
 
 #define MENU_OK		0
 #define MENU_QUIT	1
+#define MENU_NOTIFICATION 2
 
 #define MENU_DRAW_EVERYTHING	0
 #define MENU_DRAW_UPDATES		1
@@ -61,6 +62,8 @@ typedef struct {
 	menu_drawback_t *draw_item;	// custom draw function, only if items is NULL
 	menu_resort_t *resorter;	// called on scroll past top, only if items is NULL
 	uint8_t resort_filter;		// argument to resorter
+    bool run_led_background;    // should background LED bling run while the menu is displayed?
+    bool allow_notifications;   // Can this menu be interrupted and represented by a notification?
 } menu_t;
 
 extern uint8_t mbp_menu(menu_t *p_menu);

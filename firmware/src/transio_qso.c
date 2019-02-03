@@ -329,7 +329,6 @@ void transio_qso_attempt(uint8_t index) {
 
 	//Stop background LED display
 	util_led_clear();
-	mbp_background_led_stop();
 	app_sched_pause();
 
 	uint32_t ticks = APP_TIMER_TICKS(QSO_CONNECT_LED_DELAY, UTIL_TIMER_PRESCALER);
@@ -399,9 +398,7 @@ void transio_qso_attempt(uint8_t index) {
 	util_button_wait();
 	util_button_clear();
 
-	//restart background LED display
 	app_sched_resume();
-	mbp_background_led_start();
 	util_led_clear();
 }
 

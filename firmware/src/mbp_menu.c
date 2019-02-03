@@ -49,7 +49,70 @@
 #define SUBMENU_TITLE_FG		COLOR_WHITE
 #define SUBMENU_TITLE_SIZE		15
 
+// A word here about menus, background bling and notifications.
+//
+// Notifications need to be able to interrupt whatever is happening, and have
+// program flow continue when the notification is complete. This is problematic for
+// menus, since saving and restoring state would have to be implemented for each
+// menu, submenu, and menu choice. Instead, we limit notifications to being
+// allowed only while we're in a menu presented by mbp_menu().
+//
+// mbp_menu called from:
+//   mbp_menu_main()
+//   mbp_menu_bling()
+//   mbp_menu_system()
+//
+// mbp_menu() is a wrapper that simply calls __mbp_menu_inner(), which presents the menu.
+// during each call to util_button_notification_wait(), a check is made, and if there's
+// a notification mending, control is returned to mbp_menu, which calls the notification.
+// When the notification is complete, __mbp_menu_inner() is called again, and the menu is redisplayed.
+//
+// Note that this could also be done with mbp_submenu, but those menus are often quite long, and restarting them would be more annoying to the user.
+//
+// Similarly there is a flag to enable background LED bling or not
+
+uint8_t __mbp_menu_inner(menu_t *);
+
 uint8_t mbp_menu(menu_t *p_menu) {
+    bool background_led_was_running;
+    uint8_t status;
+
+    // save current background LED state and start or stop as needed
+    if (mbp_background_led_running()) {
+        background_led_was_running = true;
+        if (!p_menu->run_led_background) {
+            mbp_background_led_stop();
+        }
+    } else {
+        if (p_menu->run_led_background) {
+            mbp_background_led_start();
+        }
+    }
+
+    while (1) {
+        status = __mbp_menu_inner(p_menu);
+        if ((p_menu->allow_notifications) && (status == MENU_NOTIFICATION)) {
+            // call the notification call back and then just continue, so we reload the same menu again
+			notifications_state.p_notification_callback();
+        } else {
+            return status;
+        }
+
+    }
+
+    // restore current background LED state and return
+    if (mbp_background_led_running()) {
+        if (!background_led_was_running) {
+            mbp_background_led_stop();
+        }
+    } else {
+        if (background_led_was_running) {
+            mbp_background_led_start();
+        }
+    }
+}
+
+uint8_t __mbp_menu_inner(menu_t *p_menu) {
 	p_menu->selected = 0;
 	p_menu->top = 0;
 	util_gfx_set_font(FONT_LARGE);
@@ -59,6 +122,10 @@ uint8_t mbp_menu(menu_t *p_menu) {
 	uint32_t size = MENU_ICON_SIZE * MENU_ICON_SIZE * 2;
 	uint8_t text_offset = 11;
 	uint8_t icons[MAX_ITEMS][size];	// Only the ones on screen now
+    uint8_t button;
+    bool background_led_running;
+
+    background_led_running = mbp_background_led_running();
 
 	//Preload icons for the first screenful of the menu
 	for (uint8_t i = 0; i < p_menu->count && i < MAX_ITEMS; i++) {
@@ -124,7 +191,15 @@ uint8_t mbp_menu(menu_t *p_menu) {
 		//Track that screen is in a valid state
 		util_gfx_validate();
 
-		util_button_wait();
+        if (p_menu->allow_notifications) {
+            button = util_button_notification_wait();
+            if (button == BUTTON_MASK_SPECIAL) {
+                return MENU_NOTIFICATION;
+            }
+        } else {
+            // we're not looking for notifications
+            util_button_wait();
+        }
 
 		if (util_button_down()) {
 			//Move selected menu item down one if able
@@ -172,11 +247,15 @@ uint8_t mbp_menu(menu_t *p_menu) {
 			util_button_clear();
 			menu_item_t item = p_menu->items[p_menu->selected];
 			if (item.callback != NULL) {
+                mbp_background_led_stop();
 				item.callback(item.data);
-				util_led_clear();
+                if (background_led_running) {
+                    mbp_background_led_start();
+                }
 			}
 		}
 	}
+    
 }
 
 /**
@@ -406,6 +485,8 @@ static void mbp_menu_bling() {
 	menu.top = 0;
 	menu.title = "Bling";
 	menu.count = 0;
+    menu.run_led_background = false;
+    menu.allow_notifications = false;
 
 	items[menu.count++] = (menu_item_t ) { "VIPs", "MENU/VIP.ICO", "MENU/BLACK.PRV", &mbp_menu_bling_ks, NULL };
 
@@ -448,11 +529,9 @@ static void mbp_menu_bling() {
 		items[menu.count++] = (menu_item_t ) { "Time", "MENU/HACKTIME.ICO", "MENU/HACKTIME.PRV", &mbp_bling_hack_time, NULL };
 	}
 
-	mbp_background_led_stop();
 	//clear out app_scheduler
 	app_sched_execute();
 	mbp_menu(&menu);
-	mbp_background_led_start();
 }
 
 static void mbp_menu_games() {
@@ -538,6 +617,8 @@ static void mbp_menu_system() {
 	menu_item_t items[12];
 	menu.items = items;
 	menu.count = 0;
+    menu.run_led_background = false;
+    menu.allow_notifications = false;
 
 	items[menu.count++] = (menu_item_t ) { "Name", "MENU/NAME.ICO", NULL, &mbp_system_name_edit, NULL };
 	if (mbp_state_master_get())
@@ -580,7 +661,8 @@ void mbp_menu_main() {
 
 	menu.items = items;
 	menu.title = "JOCO19";
+    menu.run_led_background = true;
+    menu.allow_notifications = true;
 
-	mbp_background_led_start();
 	mbp_menu(&menu);
 }

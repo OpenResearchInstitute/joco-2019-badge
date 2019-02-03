@@ -1001,13 +1001,11 @@ void mastermind() {
 	// so take the easy way out and just turn them off for the duration.
 	// But we'd better also stop the periodic events that are likely to
 	// fill up the queue.
-	mbp_background_led_stop();
 	app_sched_pause();
 
 	// Try to collect the codemaker pegs from the user
 	if (! __mm_make_code()) {
 		app_sched_resume();
-		mbp_background_led_start();
 		return;
 	}
 
@@ -1017,7 +1015,6 @@ void mastermind() {
 	switch (player_type) {
 		case MM_USER_QUIT:
 			app_sched_resume();
-			mbp_background_led_start();
 			return;
 
 		case MM_REMOTE:
@@ -1026,7 +1023,6 @@ void mastermind() {
 
 			if (invite != 0) {	// 0 means the left choice, i.e., "Invite"
 				app_sched_resume();
-				mbp_background_led_start();
 				return;
 			}
 			// FALLTHROUGH
@@ -1046,7 +1042,6 @@ void mastermind() {
 	}
 
 	app_sched_resume();
-	mbp_background_led_start();
 }
 
 

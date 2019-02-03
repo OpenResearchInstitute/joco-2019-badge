@@ -402,7 +402,6 @@ void mbp_system_bugreports() {
 void mbp_system_test() {
 	uint8_t i;
 
-	mbp_background_led_stop();
 	//clear out app_scheduler
 	app_sched_execute();
 	util_gfx_set_font(FONT_SMALL);
@@ -619,7 +618,6 @@ void mbp_system_test() {
 	mbp_rssi_start();
 	util_led_clear();
 	util_button_clear();
-	mbp_background_led_start();
 }
 
 void mbp_system_tilt_mode_select() {

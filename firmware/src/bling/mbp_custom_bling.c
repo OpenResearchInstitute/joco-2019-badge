@@ -244,7 +244,6 @@ static void __menu_custom_anim_callback(void *p_data) {
 
 	if (p_data != NULL) {
 		//Clear the LEDs
-		mbp_background_led_stop();
 		util_led_clear();
 		char *filename = (char *) p_data;
 		util_gfx_draw_raw_file(filename, 0, 0, 128, 128, NULL, true, NULL);
@@ -268,7 +267,6 @@ static void __menu_custom_anim_callback(void *p_data) {
 
 	//Cleanup
 	util_led_clear();
-	mbp_background_led_start();
 }
 
 static void __animation_menu(void *p_data) {
@@ -361,6 +359,7 @@ void mbp_bling_menu_custom() {
 	items[menu.count++] = (menu_item_t ) { "Q-Z", NULL, NULL, __animation_menu, &q_to_z };
 
 	mbp_submenu(&menu);
+    util_led_clear();
 }
 
 void mbp_bling_menu_transion() {
@@ -408,6 +407,7 @@ void mbp_bling_menu_transion() {
 	items[menu.count++] = (menu_item_t ) { "Trek2", "MENU/TREK2.ICO", "MENU/TREK2.PRV", &mbp_bling_TREK2, NULL };
 	items[menu.count++] = (menu_item_t ) { "Yagi", "MENU/YAGI.ICO", "MENU/YAGI.PRV", &mbp_bling_YAGI, NULL };
 	mbp_submenu(&menu);
+    util_led_clear();
 }
 
 void mbp_bling_menu_joco_2018() {
@@ -446,5 +446,6 @@ void mbp_bling_menu_joco_2018() {
 	items[menu.count++] = (menu_item_t ) { "Pirate", "MENU/PIRATES.ICO", "MENU/PIRATES.PRV", &mbp_bling_pirate, NULL };
 
 	mbp_submenu(&menu);
+    util_led_clear();
 }
 

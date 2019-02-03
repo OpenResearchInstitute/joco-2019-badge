@@ -138,6 +138,33 @@ uint8_t util_button_wait() {
 
 
 /**
+ * Block until button press or a notification is requested
+ */
+uint8_t util_button_notification_wait() {
+	uint32_t err_code;
+	uint8_t button = util_button_state();
+	while (button == 0 && util_gfx_is_valid_state()) {
+        // wake every 100 mS to check for a notification
+		APP_ERROR_CHECK(app_timer_start(m_button_timer, APP_TIMER_TICKS(100, UTIL_TIMER_PRESCALER), NULL));
+
+		err_code = sd_app_evt_wait();
+		APP_ERROR_CHECK(err_code);
+
+        if (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) {
+				button = BUTTON_MASK_SPECIAL;
+        } else if (util_button_state() != 0){
+            button = util_button_state();
+        }
+        
+		//Work on anything in the scheduler queue
+		app_sched_execute();
+	}
+	m_button_wait_expired = false;
+	return button;
+}
+
+
+/**
  * Block until button press or timeout
  */
 uint8_t util_button_wait_timeout(uint32_t duration_ms) {

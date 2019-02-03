@@ -3,11 +3,12 @@
 ## Things which are displayed on the LEDs and LCD:
 
 * Boot sequence
-* A menu (displayed initially then never agin)
+* A menu (displayed initially then never again)
 * The "Game Over" LCD display, reached by exiting the top level menu
 * A "Hello", which is displayed when acknowledging another badge (displayed from within the background bling repeated timer callback)
 * A "custom" bling Selected from a menu (displays until exited)
 * A "Notification", which displays until it times out or a buntton is pressed. These display no matter what else is displaying (not during the boot sequence)
+* Various menus. The top level one is presented by mbp_menu_main(), called from main.c
 
 ## Background Bling
 

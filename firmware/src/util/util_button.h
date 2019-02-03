@@ -45,6 +45,7 @@ extern void util_button_clear();
 extern void util_button_init();
 extern uint8_t util_button_state();
 extern uint8_t util_button_wait();
+extern uint8_t util_button_notification_wait();
 extern uint8_t util_button_wait_timeout(uint32_t duration_ms);
 extern uint8_t util_button_down();
 extern uint8_t util_button_up();
