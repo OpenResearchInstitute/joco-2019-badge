@@ -33,7 +33,6 @@ uint16_t __choose_creature(void);
 
 
 APP_TIMER_DEF(m_capture_timer);
-APP_TIMER_DEF(m_notify_check_timer);
 
 void __encode_name(uint16_t cid, char *name) {
 	if (cid > 9999) {
@@ -120,11 +119,9 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 }
 
 static void __capture_timer_handler(void * p_data) {
-	creature_data_t creature_data;
 	char name[SETTING_NAME_LENGTH];
-	bool ok;
-	
-	// This should fire once per second. It handles two tasks
+
+	// This should fire once per second. It handles one task, which is deciding whethre to broadcast a creature
 	if (capture_state.initialized) {
 		// If it's time to send a random creature, do that
 		if (--capture_state.countdown == 0) {
@@ -173,51 +170,7 @@ static void __capture_timer_handler(void * p_data) {
 				capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
 			}
 		}
-		// See if we have a notification request that has completed.
-		if (notifications_state.state == NOTIFICATIONS_STATE_COMPLETE) {
-			switch (notifications_state.button_value) {
-			case BUTTON_MASK_UP:
-			case BUTTON_MASK_DOWN:
-			case BUTTON_MASK_LEFT:
-			case BUTTON_MASK_RIGHT:
-			case BUTTON_MASK_ACTION:
-				// user pressed a button
-				ok = read_creature_data(notifications_state.user_data, &creature_data);
-				if (ok) {
-					// add to score
-					add_to_score(rarity_to_points(creature_data.percent), creature_data.name);
-					mbp_state_capture_set_captured(notifications_state.user_data);
-					mbp_state_capture_count_increment();
-					notifications_state.user_data = 0;
-				}
-				break;
-			case BUTTON_MASK_SPECIAL:
-				// the notification timed out, so do nothing
-				break;
-			default:
-				break;
-			}
-			notifications_state.state = NOTIFICATIONS_STATE_IDLE; // ready for another notification
-		}
 	}
-	app_sched_execute();
-}
-
-static void __notify_check_timer_handler(void * p_data) {
-	//
-	// The only purpose of this timer is to detect that a notification is needed for the case when custom bling
-	// isn't running, and run it here.
-	//
-
-	// make a final check that conditions are ok
-	if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
-		return;
-	}
-	if ((blinging) || (!mbp_background_led_running())) {
-		return;
-	}
-	notifications_state.p_notification_callback();
-
 	app_sched_execute();
 }
 
@@ -252,15 +205,6 @@ void capture_init(void) {
 	ticks = APP_TIMER_TICKS(CAPTURE_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
 	err_code = app_timer_start(m_capture_timer, ticks, NULL);
 	APP_ERROR_CHECK(err_code);
-
-	err_code = app_timer_create(&m_notify_check_timer, APP_TIMER_MODE_REPEATED, __notify_check_timer_handler);
-	APP_ERROR_CHECK(err_code);
-
-	ticks = APP_TIMER_TICKS(NOTIFY_CHECK_TIMER_INTERVAL, UTIL_TIMER_PRESCALER);
-	err_code = app_timer_start(m_notify_check_timer, ticks, NULL);
-	APP_ERROR_CHECK(err_code);
-
-
 }
 
 bool capture_is_sending() {

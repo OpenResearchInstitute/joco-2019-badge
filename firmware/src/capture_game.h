@@ -34,7 +34,6 @@
 #define CAPTURE_MAX_INDEX 255 // cannot exceed 9999
 #define CAPTURE_BITMASK_ARRAY_LEN ((CAPTURE_MAX_INDEX/32)+1) // used for tracking which creatures we've captured
 #define CAPTURE_TIMER_INTERVAL 1000 // milliSeconds
-#define NOTIFY_CHECK_TIMER_INTERVAL 100
 #define CAPTURE_MAX_NAME_LEN 10
 #define CAPTURE_MAX_INDEX_DIGITS 4
 #define CAPTURE_MAX_DAT_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
