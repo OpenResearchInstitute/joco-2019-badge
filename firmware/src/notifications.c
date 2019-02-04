@@ -38,7 +38,6 @@ void capture_notification_callback() {
     char temp[32];
 
     uint8_t button;
-    bool redraw = true;
     bool background_was_running;
 
     creature_data_t creature_data;
@@ -65,45 +64,35 @@ void capture_notification_callback() {
     // Top text line is at Y coordinate 0
     // Bottom text line is at Y coordinate 
 
-    while (redraw || !util_gfx_is_valid_state()) {
+    //Make sure there's no clipping
+    util_gfx_cursor_area_reset();
 
-        //Make sure there's no clipping
-        util_gfx_cursor_area_reset();
+    //Draw background
+    mbp_ui_cls();
 
-        //Draw background
-        mbp_ui_cls();
+    background_was_running = mbp_background_led_running();
 
-        // TODO Load the graphic file as background
+    mbp_background_led_stop();
 
-        sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
-        util_gfx_draw_raw_file(temp, 0, 10, 128, 104, NULL, false, NULL);
+    //sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
+    //util_gfx_draw_raw_file(temp, 0, 10, 128, 104, NULL, false, NULL);
 
-        //Print their name
-        util_gfx_set_font(FONT_LARGE);
-        util_gfx_set_color(COLOR_WHITE);
-        util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
-        util_gfx_print(creature_data.name);
+    //Print their name
+    util_gfx_set_font(FONT_LARGE);
+    util_gfx_set_color(COLOR_WHITE);
+    util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
+    util_gfx_print(creature_data.name);
 
-        //Print points
-        util_gfx_set_color(COLOR_RED);
-        sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
-        util_gfx_set_cursor(0, 117);
-        util_gfx_print(temp);
+    //Print points
+    util_gfx_set_color(COLOR_RED);
+    sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
+    util_gfx_set_cursor(0, 117);
+    util_gfx_print(temp);
 
-        background_was_running = mbp_background_led_running();
+    sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
+    char rgbfile[] = "BLING/KIT.RGB";
+    button = notification_filebased_bling(temp, rgbfile);
 
-        mbp_background_led_stop();
-
-        mbp_notification_led_start();
-
-        redraw = false;
-    }
-
-    //validate screen state
-    util_gfx_validate();
-
-    // wait until we time out or the user presses a button
-    button = util_button_wait_timeout(notifications_state.timeout * 1000);
     notifications_state.button_value = button;
     util_button_clear();    //Clean up button state
 

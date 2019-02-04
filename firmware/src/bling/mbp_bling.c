@@ -92,7 +92,7 @@ static void __led_sparkle(uint8_t frame, void *p_data) {
     hue += 0.1;
     if (hue >= 1) {
         hue = 0;
-    }
+   }
 
     //Pack the hue
     *data = (uint8_t) (hue * 10.0);
@@ -360,6 +360,13 @@ void simple_filebased_bling(char *rawfile, char *rgbfile) {
     UTIL_LED_ANIM_INIT(anim);
     util_led_load_rgb_file(rgbfile, &anim);
     util_gfx_draw_raw_file(rawfile, 0, 0, 128, 128, &__rgb_file_callback, true, (void *) &anim);
+}
+
+uint8_t notification_filebased_bling(char *rawfile, char *rgbfile) {
+    util_led_clear();
+    UTIL_LED_ANIM_INIT(anim);
+    util_led_load_rgb_file(rgbfile, &anim);
+    return (util_gfx_draw_raw_file(rawfile, 0, 10, 128, 104, &__rgb_file_callback, true, (void *) &anim));
 }
 
 void mbp_bling_backer_abraxas3d(void *data) {
