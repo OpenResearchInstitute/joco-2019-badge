@@ -59,6 +59,12 @@ void capture_notification_callback() {
         return;
     }
 
+    // We use large font, which is mishmash7pt7b,
+    // which has a vertical stride of 12 pixel lines.
+    // 128 - 24 = 104, for a 128 x 104 image
+    // Top text line is at Y coordinate 0
+    // Bottom text line is at Y coordinate 
+
     while (redraw || !util_gfx_is_valid_state()) {
 
         //Make sure there's no clipping
@@ -70,7 +76,7 @@ void capture_notification_callback() {
         // TODO Load the graphic file as background
 
         sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
-        util_gfx_draw_raw_file(temp, 0, 0, 128, 128, NULL, false, NULL);
+        util_gfx_draw_raw_file(temp, 0, 10, 128, 104, NULL, false, NULL);
 
         //Print their name
         util_gfx_set_font(FONT_LARGE);
@@ -78,16 +84,10 @@ void capture_notification_callback() {
         util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
         util_gfx_print(creature_data.name);
 
-        if (mbp_notification_led_running()) {
-            strcpy(temp, "REENTERED");
-            util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 52);
-            util_gfx_print(temp);
-        }
-
         //Print points
         util_gfx_set_color(COLOR_RED);
         sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
-        util_gfx_set_cursor(NOTIFICATION_UI_MARGIN, 110);
+        util_gfx_set_cursor(0, 117);
         util_gfx_print(temp);
 
         background_was_running = mbp_background_led_running();
