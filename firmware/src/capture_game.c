@@ -94,20 +94,16 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char *pdst = &creature_data->name[0];
 
 	while ((*pch != 0x0A) && (cctr < CAPTURE_MAX_NAME_LEN)) {
-		// we should probably test for nonprintables here
-		if (*pch == 0x0A) {
-			*pdst = 0; // null terminate the name string
-			break;
-		} else {
-			*pdst++ = *pch++;
-			cctr++;
-		}
+        // we should probably test for nonprintables here
+        *pdst++ = *pch++;
+        cctr++;
 	}
 
 	if (cctr >= CAPTURE_MAX_NAME_LEN) {
 		__write_bad_file_flag(id, "name");
 		return false;
 	} else {
+        *pdst = 0; // null terminate the name string
 		pch++;
 		uint32_t tpct = strtol(pch, NULL, 10);
 		if (tpct > 100) {
