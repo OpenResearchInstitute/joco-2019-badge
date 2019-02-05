@@ -12,13 +12,15 @@
 
 ## Background Bling
 
-Background LED bling runs at all times unless something stops it (games typically stop it). Anything that stops the LED background bling restarts it when finished.
-Places in the code that stop/restart the background LED bling are:
+Fomerly, LED bling ran at all times unless something stoped it (games typically stop it). Anything that stops the LED background bling restarts it when finished.
+Places in the code that usewd to stop/restart the background LED bling were:
 * Starting any custom bling from the menus stops it
 * Entering menus below the main menu seems to stop it but not clear the LEDs (check this)
 * Some custom bling that is started/stoppped in mbp_term.c in __bling_schedule_handler()
 * games - chip8, mastermind, capture, transio QSL, skifree
 * during execution of TCL scripts
+
+This has been changed to only display background LED bling in the top level menu, which is where most people tend to 'park' their display if they're not displaying custom bling. This made it easier to not have to worry about when to turn off and on the background bling. However, in the final implementation of notifications this matters less, and it should be possible to add back more places that display background bling if needed.
 
 The background LED bling code is in bling/mbp_bling.c
 The timer handler __background_led_sch_handler() is called every BACKGROUND_LED_TIME_MS
@@ -47,19 +49,20 @@ The majority of custom bling displays are started by simple_filebased_bling(), w
 Eventually, this results in a call to util_gfx_draw_raw_file(), from util/util_gfx.c, which accepts a file name for a .RAW file to display on the LCD, and a callback, which is called every frame.
 Each time through the frame loop in util_gfx_draw_raw_file(), the buttons are tested and if any button has been pressed, control is returned to the caller.
 
-The newly added global boolean 'blinging' is set while a bling is being displayed
+In order to facilitate notifications, a timeout parameter was added to util_gfx_draw_raw_file(). If the timeout is reached, a button code of zer is returned.
 
 # Notifications
 
-Notifications must be able to 'interrupt' either custom bling or the background bling, and upon completion, return to the previous display. All other times where background bling is stopped, notifications will not be displayed.
+Notifications must be able to 'interrupt' either custom bling or menus, and upon completion, return to the previous display. All other times where background bling is stopped, notifications will not be displayed. Upon return from a notification, the custom bling or menu that was interrupted is displayed from the beginning. Code to detect and break for notifications was only added to mbp_menu() and not mbp_submenu(), and is maskable. It is only enabled for the topmost menu. This is because it could be very annoying to get interrupted in some of the deeper, longer menus and have them redisplay from the top after a notification.
 
 A Notification does the following, from the user POV:
 
 0. See if a notification is in progress and ignore if one is.
 1. Clear the LCD and LEDs
-2. Display a static image on the LCD
-3. Overlay text on that image
-4. Wait until the user presses a button and return the button code
+3. Display text text on the LCD
+4. Play a RAW animation in a window on the LCD (which excludes the text area), with a timeout
+5. Wait until the user presses a button or the timeout is reached
+6. Read the button code for the button pressed (0 == timeout)
 
 ## Notification Implementation
 
@@ -74,7 +77,7 @@ Since this needs to be able to pre-empt either background bling or custom bling,
 	uint16_t    user_data;
 	uint8_t	    state;
 	uint8_t     button_value;
-	char        image_filename[20]; // 8.3 plus a terminator plus any possible path
+	char        led_filename[20]; // 8.3 plus a terminator plus any possible path
 ```
 
 * p_notification_callback - is called to do the actual bling, and is called by a looping bling that detects that a notification has been requested
@@ -83,45 +86,44 @@ Since this needs to be able to pre-empt either background bling or custom bling,
 * user_data - contains the ID of the creature we're alerting for. This is used to retrieve the image and score information for the notification.
 * state - tracks state and is set by various steps in the process
 * button_value - when the notification is complete, this contains the ID of the button the user pressed to ack the notification, or BUTTON_MASK_SPECIAL if it timed out.
-* image_filename - is redundant and not used, and will be removed
+* led_filename - aa filename for .RGB bling to play during the notification
 
 State and timers are used to manage notifications because:
 Notifications are triggered in the advertising receive code, but we don't want to block there.
 The capture game software needs to know whether the user pressed a button, in order to know whether to score the creature.
 
-## Notification flow
+## Notification flow for the capture game
 
 When a creature packet is received, the creature id (a one-based index) is extracted from the name field, and capture_process_heard() in capture_game.c is called.
 
 capture_process_heard does the following:
 
-0. Return immediately if the notification state isn't "IDLE"
-1. Return if we're not blinging or displaying background LEDs. This check avoinds interrupting games and menus.
+1. Return immediately if the notification state isn't "IDLE"
 2. in the notification_state structure, set the callback to point to capture_notification_callback() in notifications.c
-3. in the notification_state struct, store the creature ID, timeout, and led style
-4. in th enotification state struct, set state to REQUESTED
+3. in the notification_state struct, store the creature ID, timeout, and led bling file name
+4. in the notification state struct, set state to REQUESTED
 5. return
 
-Inside bling loops (currently only implemented for custom bling, see below), the notification state is tested, and if it is REQUESTED, then the current bling state is saved, and the callback is called.
+Inside the custom bling display loop and during menu keypress check, the notification state is tested, and if it is REQUESTED, then the current state is saved, and the callback is called.
 
 The callback:
 * sets notification state to IN_PROGRESS
 * displays the image of the creature plus some text
 * stops background LED bling if it's running
 * starts the notification background LED bling
+* displays desired text
+* starts playing a RAW file (can be an animation or a single frame static image)
 * spins until the user presses a key, or until it times out
 * stops the notification background LED bling is stopped
 * if background LED bling was previously running, it is restarted
 * The keypress is written to notification_state.button_value, and is BUTTON_MASK_SPECIAL if the notification timed out
-* The notification state is then set to COMPLETE
-* control returns to the caller, which is expected to restore the current bling state and continue.
+* acts on the user button press (or timeout)
+* The notification state is then set to IDLE, skipping the optional COMPLETE state
+* control returns to the caller, which is expected to restore the current bling or menu state and continue.
 
-At this point, all that's left to do is act on the user button press (or timeout. This is handled inside a repeated timer which calls \__capture_timer_handler() in capture_game.c.
-This timer fires once per second and handles periodically sending random creature packets, but it also checks for completion of a notification.
-
-In this timer handler, if the notification state is COMPLETE, then the following are done:
-* if the user acknowledged the notification, add the appropriate score and flasg the creature as caught
-* Set the notification state to IDLE
+Other implementations may wish to handle the completion of the notification in a separate thread, or in a period timer.
+If this is desired, then the callback can set the state to COMPLETE and return, and the notification state of COMPLETE can trigger
+the actions in another context, after which state is set to IDLE.
 
 ## How custom bling handles saving state and restoring it during a notification
 
@@ -132,28 +134,7 @@ I renamed this function to util_gfx_draw_raw_file_inner() and made the originall
 
 The wrapper function util_gfx_draw_raw_file() detects this, and calls the notification callback. When that completes, it simply calls the inner function again, which reumes the original bling.
 
-This works! As long a a notification arrives while a custom bling is playing, you get the notification and it works, although the notification LED flashing is not right, for reasons I haven't yet found.
+## How mbp_menu handles saving state and restoring it during a notification
 
-## But what about times when there's no custom bling and we're displaying background LED bling?
-
-This is totally broken. What I did (naively) was create a repeated timer in capture_game.c which calls __notify_check_timer_handler(), which detects the case of displaying background LED bling while NOT in a custome bling, and calls the notification callback.
-
-The problem with this is that background bling runs independently of a lot of user interaction. It's on during a lot of different menu displays, although it's turned off for some. But it doesn't seem to be on OUTSIDE of when menus are being displayed. Also, background LED bling is sometimes turned off without clearing the LEDs, but we can and should fix that.
-
-Here's my thinking so far on this, but I want to make sure there's not a better way.
-
-menus all resolve to mbp_menu(). Button presses are checked continuously in this code with calls to util_button_wait(). We could wrap mbp_menu the same way I did with util_gfx_draw_raw_file(), and add a check for pending notification to util_button_wait() that returns BUTTON_MASK_SPECIAL if there's a notification needed. We may have to add a new function util_button_wait_menu() which is used by menus, since some games also use the call, and I don't want to return unexpected button value to them.
-
-As long as background bling is only displayed while menus are active, I think this will work.
-
-## (for bonus points) and what about a better way to display notifications with LEDs flashing?
-
-I think maybe there's a better way to display notification LED bling than to duplicate the background LED code. 
-
-In the notification callback, we could load an LED bling file, as is done in simple_filebased_bling(), and then as we spin waiting for a user keypress, we can call util_play_rgb_frame(). If we make the spin loop delay the right value, it'll look good - we're not trying to sync with an LCD animation.
-
-If we do this, the notification state can contain the name of an LED bling file, and not just a style, and I think it'll be more flexible.
-
-
-
+This is identical to the way the bling was done. The old function is now a wrapper to an inner function, which checks for a pending notification and returns control, allowing display of the notification.
 
