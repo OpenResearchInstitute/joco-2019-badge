@@ -74,9 +74,6 @@ void capture_notification_callback() {
 
     mbp_background_led_stop();
 
-    //sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
-    //util_gfx_draw_raw_file(temp, 0, 10, 128, 104, NULL, false, NULL);
-
     //Print their name
     util_gfx_set_font(FONT_LARGE);
     util_gfx_set_color(COLOR_WHITE);
@@ -91,7 +88,7 @@ void capture_notification_callback() {
 
     sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
     char rgbfile[] = "BLING/KIT.RGB";
-    button = notification_filebased_bling(temp, rgbfile);
+    button = notification_filebased_bling(temp, rgbfile, (notifications_state.timeout * 1000));
 
     notifications_state.button_value = button;
     util_button_clear();    //Clean up button state

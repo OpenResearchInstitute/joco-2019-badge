@@ -156,7 +156,7 @@ extern void util_gfx_draw_raw(int16_t x, int16_t y, uint16_t w, uint16_t h, uint
  * @return Happiness
  */
 extern uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_callback)(uint8_t frame, void *p_data),
-		bool loop, void *data);
+                                      bool loop, void *data, uint32_t time);
 
 /**
  * Indicate to the draw raw file function that it should interrupt its looping vice waiting for the user

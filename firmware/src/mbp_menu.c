@@ -144,10 +144,10 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 		//Draw preview
 		if (selected.preview == NULL) {
                     util_gfx_draw_raw_file("MENU/DEFAULT.PRV", MENU_SIZE, MENU_INDICATOR_H, GFX_WIDTH - MENU_SIZE, GFX_HEIGHT - MENU_INDICATOR_H, NULL, false,
-                                           NULL);
+                                           NULL, 0);
 		} else {
 			util_gfx_draw_raw_file(selected.preview, MENU_SIZE, MENU_INDICATOR_H, GFX_WIDTH - MENU_SIZE, GFX_HEIGHT - MENU_INDICATOR_H, NULL,
-			false, NULL);
+                                   false, NULL, 0);
 		}
 
 		//Draw indicator section
@@ -160,7 +160,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 		util_gfx_print(name);
 
 		if (mbp_state_airplane_mode_get()) {
-			util_gfx_draw_raw_file("MENU/INDPLANE.RAW", 113, 1, 14, 14, NULL, false, NULL);
+			util_gfx_draw_raw_file("MENU/INDPLANE.RAW", 113, 1, 14, 14, NULL, false, NULL, 0);
 		}
 
 		//Setup font again to ensure something else hasn't changed it to small
@@ -447,7 +447,7 @@ static void mbp_menu_bling_ks() {
 	while (1) {
 		if (!util_gfx_is_valid_state()) {
 			util_led_clear();
-			util_gfx_draw_raw_file(backer_images[selected], 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, false, NULL);
+			util_gfx_draw_raw_file(backer_images[selected], 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, false, NULL, 0);
 		}
 		util_gfx_validate();
 

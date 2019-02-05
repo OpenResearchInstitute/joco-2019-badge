@@ -234,7 +234,7 @@ static int __tcl_image(struct tcl *tcl, tcl_value_t *args, void *arg) {
 	int16_t h = tcl_int(tcl_h);
 	char *path = (char *) tcl_string(tcl_path);
 
-	util_gfx_draw_raw_file(path, x, y, w, h, NULL, false, NULL);
+	util_gfx_draw_raw_file(path, x, y, w, h, NULL, false, NULL, 0);
 
 	tcl_free(tcl_x);
 	tcl_free(tcl_y);
@@ -546,7 +546,7 @@ static int __tcl_play(struct tcl *tcl, tcl_value_t *args, void *arg) {
 
 	char * path = (char *) tcl_string(tcl_path);
 	m_quit = false;
-	util_gfx_draw_raw_file(path, 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, false, NULL);
+	util_gfx_draw_raw_file(path, 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, false, NULL, 0);
 
 	tcl_free(tcl_body);
 	tcl_free(tcl_path);

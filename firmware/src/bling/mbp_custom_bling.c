@@ -246,7 +246,7 @@ static void __menu_custom_anim_callback(void *p_data) {
 		//Clear the LEDs
 		util_led_clear();
 		char *filename = (char *) p_data;
-		util_gfx_draw_raw_file(filename, 0, 0, 128, 128, NULL, true, NULL);
+		util_gfx_draw_raw_file(filename, 0, 0, 128, 128, NULL, true, NULL, 0);
 	} else {
 		mbp_ui_cls();
 		util_button_wait();

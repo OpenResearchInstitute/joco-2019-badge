@@ -453,16 +453,24 @@ void util_gfx_draw_raw(int16_t x, int16_t y, uint16_t w, uint16_t h, uint8_t *p_
 }
 
 uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_frame_callback)(uint8_t frame, void *p_data), bool loop,
-		void *data) {
+		void *data, uint16_t time) {
 	FIL raw_file;
 	FRESULT result;
 	int32_t bytecount;
+    uint32_t end_millis;
 	uint16_t chunk_size = 8 * 128 * 2;
 	uint8_t sdbuffer[chunk_size];
 	UINT count;
 	uint16_t frames = 1;
 	uint8_t button = 0;	//Button state, changed when the animation is stopped by the user
 
+    // NOTE!! If this is called with a timeout, you must be prepared to handle a button return value of 0
+    // if time is nonzero, it's how long in mS to display the bling before returning
+    if (loop && (time > 0)) {
+        // A timeout only makese sense if we're looping
+        end_millis = util_millis() + time;
+    }
+    
 	//Stat the file to determine frame count
 	uint32_t fsize = util_sd_file_size(filename);
 	if (fsize == 0) {
@@ -562,6 +570,15 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 				break;					//Quit the for loop
 			}
 
+            // Check to see whether we have reached a desired timeout
+            if (loop && (time > 0)) {
+                if (util_millis() >= end_millis) {
+                    button = 0;
+                    loop = false;
+                    break;
+                }
+            }
+
 			// Check to see if a notification needs to be displayed, but only if we're looping 
 			if (loop && (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED)) {
 				loop = false;
@@ -589,7 +606,7 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 }
 
 uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w, uint16_t h, void (*p_frame_callback)(uint8_t frame, void *p_data), bool loop,
-		void *data) {
+                               void *data, uint32_t time) {
 	uint8_t rstat;
 	bool done;
 	done = false;
@@ -599,7 +616,7 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 	// a button, but because we need to display a notification. In that case, since we interrupted a bling, we restart it
 	// after the notification is done
 	do {
-		rstat = __util_gfx_draw_raw_file_inner(filename, x, y, w, h, p_frame_callback, loop, data);
+		rstat = __util_gfx_draw_raw_file_inner(filename, x, y, w, h, p_frame_callback, loop, data, time);
 		if (rstat == BUTTON_MASK_SPECIAL) {
 			// Inside the bling look, it was detected that there's a notification pending
 			// TODO Validate that callback pointer

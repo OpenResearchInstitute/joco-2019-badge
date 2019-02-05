@@ -45,7 +45,7 @@ static void __do_hello(char *name, char *lcd_file) {
     uint32_t color_1 = util_led_hsv_to_rgb(h1, 1, 1);
     uint32_t color_2 = util_led_hsv_to_rgb(h2, 1, 1);
 
-    util_gfx_draw_raw_file(lcd_file, 0, 0, GFX_WIDTH, GFX_HEIGHT, __play_1_frame_only, false, NULL);
+    util_gfx_draw_raw_file(lcd_file, 0, 0, GFX_WIDTH, GFX_HEIGHT, __play_1_frame_only, false, NULL, 0);
     uint16_t fg = util_gfx_rgb_to_565(color_1);
     uint16_t bg = util_gfx_rgb_to_565(color_2);
 

@@ -139,7 +139,7 @@ static void __bling_schedule_handler(void *p_data, uint16_t length) {
 		mbp_bling_owl();
 		break;
 	case TERM_BLING_MODE_RICK_ROLL:
-		util_gfx_draw_raw_file("/BLING/AND!XOR/RICKROLL.RAW", 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, true, NULL);
+		util_gfx_draw_raw_file("/BLING/AND!XOR/RICKROLL.RAW", 0, 0, GFX_WIDTH, GFX_HEIGHT, NULL, true, NULL, 0);
 		break;
 	}
 
