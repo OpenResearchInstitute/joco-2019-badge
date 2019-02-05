@@ -20,9 +20,6 @@
 
 #define NOTIFICATION_TIMER_INTERVAL 100 // milliSeconds
 
-#define LED_STYLE_RED_FLASH 1
-#define LED_STYLE_GREEN_FLASH 2
-
 #define NOTIFICATIONS_STATE_IDLE        0
 #define NOTIFICATIONS_STATE_REQUESTED   1
 #define NOTIFICATIONS_STATE_IN_PROGRESS 2
@@ -31,11 +28,10 @@
 typedef struct {
 	void        (*p_notification_callback)(void);
 	uint32_t    timeout; // in seconds
-	uint16_t    led_style;
 	uint16_t    user_data;
 	uint8_t	    state;
 	uint8_t     button_value;
-	char        image_filename[20]; // 8.3 plus a terminator plus any possible path
+	char        led_filename[20]; // 8.3 plus a terminator plus any possible path
 	// filename for LED bling??
 } notifications_state_t;
 

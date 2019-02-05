@@ -126,8 +126,4 @@ extern bool mbp_background_led_running();
 extern void mbp_background_led_start();
 extern void mbp_background_led_stop();
 
-extern bool mbp_notification_led_running();
-extern void mbp_notification_led_start();
-extern void mbp_notification_led_stop();
-
 #endif /* MBP_ANIM_H_ */

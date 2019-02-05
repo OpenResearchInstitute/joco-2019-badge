@@ -276,12 +276,10 @@ void capture_process_heard(char *name) {
 #endif
 		notifications_state.p_notification_callback = capture_notification_callback;
 
-		// possibly TODO make changes in appearance based on how rare it is
+		// possibly TODO make changes in LED flash appearance based on how rare it is
 		notifications_state.timeout = CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH;
-		notifications_state.led_style = LED_STYLE_RED_FLASH;
+        strcpy(notifications_state.led_filename, "BLING/KIT.RGB");
 
-		// Creature filenames are "nnnn.RAW", based on the creature number
-		sprintf(notifications_state.image_filename, "CAPTURE/%04d.RAW", creature_id); // make sure the destination is long enough if you change this.
 		notifications_state.user_data = creature_id;
 		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
 

@@ -48,7 +48,6 @@
 #define SCROLL_TIME_MS              20
 
 APP_TIMER_DEF(m_background_led_timer);
-APP_TIMER_DEF(m_notification_led_timer);
 APP_TIMER_DEF(m_scroll_led_timer);
 
 // For a shiny gold tooth
@@ -61,7 +60,6 @@ static bool tooth_flashing = false;
 static float m_eye_hue = 0;
 
 static bool m_background_led_running = false;
-static bool m_notification_led_running = false;
 
 typedef struct {
     uint8_t index;
@@ -1077,81 +1075,21 @@ static void __background_led_sch_handler(void * p_event_data, uint16_t event_siz
     }
 }
 
-#define NOTIF_ON_COUNT 20 // simple blink
-#define NOTIF_END_COUNT 40
-static void __notification_led_sch_handler(void * p_event_data, uint16_t event_size) {
-	// Currently called 10x per second
-	static int bg_cycle_count = 0;
-	uint32_t led_color;
-
-	switch (notifications_state.led_style) {
-	case LED_STYLE_RED_FLASH:
-		led_color = LED_COLOR_RED;
-		break;
-	case LED_STYLE_GREEN_FLASH:
-		led_color = LED_COLOR_GREEN;
-		break;
-	default:
-		led_color = LED_COLOR_WHITE; // unexpected
-		break;
-	}
-
-	if (bg_cycle_count < NOTIF_ON_COUNT) {
-		led_color = LED_COLOR_BLACK;
-	}
-
-	for (uint8_t i = 0; i < LED_COUNT; i++) {
-		util_led_set_rgb(i, led_color);
-	}
-
-	if (++bg_cycle_count >= NOTIF_END_COUNT) {
-		bg_cycle_count = 0;
-	}
-
-	util_led_show();
-
-	// If computations are extensive, do them here, not before
-	// updating the display.
-}
-
 static void __background_led_timer_handler(void *p_data) {
     app_sched_event_put(NULL, 0, __background_led_sch_handler);
-}
-
-static void __notification_led_timer_handler(void *p_data) {
-    app_sched_event_put(NULL, 0, __notification_led_sch_handler);
 }
 
 bool mbp_background_led_running() {
     return m_background_led_running;
 }
 
-bool mbp_notification_led_running() {
-    return m_notification_led_running;
-}
-
 void mbp_background_led_start() {
-    if (m_notification_led_running) {
-	    // just refuse
-	    return;
-    } else if (!m_background_led_running) {
+    if (!m_background_led_running) {
         //Start up timer for updating the background LED display
         APP_ERROR_CHECK(app_timer_create(&m_background_led_timer, APP_TIMER_MODE_REPEATED, __background_led_timer_handler));
         APP_ERROR_CHECK(app_timer_start(m_background_led_timer, APP_TIMER_TICKS(BACKGROUND_LED_TIME_MS, UTIL_TIMER_PRESCALER), NULL));
 
         m_background_led_running = true;
-    }
-}
-
-void mbp_notification_led_start() {
-    if (m_background_led_running) {
-	    return; // refuse
-    } else if (!m_notification_led_running) {
-        //Start up timer for updating the notification LED display
-        APP_ERROR_CHECK(app_timer_create(&m_notification_led_timer, APP_TIMER_MODE_REPEATED, __notification_led_timer_handler));
-        APP_ERROR_CHECK(app_timer_start(m_notification_led_timer, APP_TIMER_TICKS(BACKGROUND_LED_TIME_MS, UTIL_TIMER_PRESCALER), NULL));
-
-        m_notification_led_running = true;
     }
 }
 
@@ -1162,15 +1100,5 @@ void mbp_background_led_stop() {
         APP_ERROR_CHECK(app_timer_stop(m_background_led_timer));
 
         m_background_led_running = false;
-    }
-}
-
-void mbp_notification_led_stop() {
-    if (m_notification_led_running) {
-        util_led_set_all_rgb(LED_COLOR_BLACK);
-        util_led_show();
-        APP_ERROR_CHECK(app_timer_stop(m_notification_led_timer));
-
-        m_notification_led_running = false;
     }
 }

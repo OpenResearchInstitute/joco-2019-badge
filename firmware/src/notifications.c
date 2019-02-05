@@ -87,8 +87,7 @@ void capture_notification_callback() {
     util_gfx_print(temp);
 
     sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
-    char rgbfile[] = "BLING/KIT.RGB";
-    button = notification_filebased_bling(temp, rgbfile, (notifications_state.timeout * 1000));
+    button = notification_filebased_bling(temp, notifications_state.led_filename, (notifications_state.timeout * 1000));
 
     notifications_state.button_value = button;
     util_button_clear();    //Clean up button state
@@ -114,7 +113,6 @@ void capture_notification_callback() {
         break;
     }
 
-    mbp_notification_led_stop();
     //Only start background LED display if previously running
     if (background_was_running) {
         mbp_background_led_start();
