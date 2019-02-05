@@ -47,7 +47,6 @@ static area_t m_cursor_area = { 0, 0, 0, 0 };
 static uint8_t m_font = FONT_SMALL;
 static uint16_t m_color = COLOR_WHITE;
 static bool m_wrap = true;
-volatile bool blinging = false;
 static volatile bool m_stop = false;
 
 //Track validity of screen state
@@ -610,7 +609,6 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 	uint8_t rstat;
 	bool done;
 	done = false;
-	blinging = true;
 	// In order to be able to handle async requests for notifications, we repeatedly call to draw the bling.
 	// If we get a return value of BUTTON_MASK_SPECIAL, then we know that control returned not because the user pressed
 	// a button, but because we need to display a notification. In that case, since we interrupted a bling, we restart it
@@ -628,7 +626,6 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 			done = true;
 		}
 	} while (!done);
-	blinging = false;
 	return rstat;
 }
 
