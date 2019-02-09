@@ -19,9 +19,6 @@
 
 #include "system.h"
 
-#define NOTIFICATION_UI_MARGIN         3
-#define NOTIFICATION_UI_MARGIN_RIGHT  12
-
 notifications_state_t   notifications_state;
 
 void notifications_init() {
@@ -74,7 +71,7 @@ void capture_notification_callback() {
 
     mbp_background_led_stop();
 
-    //Print their name
+    //Print the name
     util_gfx_set_font(FONT_LARGE);
     util_gfx_set_color(COLOR_WHITE);
     util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);

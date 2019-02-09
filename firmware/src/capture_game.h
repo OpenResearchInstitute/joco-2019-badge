@@ -65,11 +65,16 @@ typedef struct {
 #define CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH 40 // Seconds
 #define CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH 5 // Seconds
 
+// How long to display each creature in bling
+#define CAPTURE_BLING_DELAY 2000 // in mS
+
 extern uint16_t decode_creature_name(char *);
 extern uint16_t rarity_to_points(uint8_t);
 extern bool read_creature_data(uint16_t, creature_data_t *);
 extern void capture_init(void);
 extern bool capture_is_sending(void);
 extern void capture_process_heard(char *name);
+extern void mbp_bling_captured(void *data);
+
 
 #endif /* CAPTURE_GAME_H_ */

@@ -281,3 +281,70 @@ void capture_process_heard(char *name) {
 
 	}
 }
+
+void mbp_bling_captured(void *data) {
+    // Display all captures creatures in sequence
+    char temp[32];
+
+    uint8_t button;
+    bool background_was_running;
+	creature_data_t creature_data;
+
+    if (mbp_state_capture_count_get() == 0) {
+        util_gfx_cursor_area_reset();
+        mbp_ui_cls();
+        util_gfx_set_font(FONT_LARGE);
+        util_gfx_set_color(COLOR_WHITE);
+        util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
+        util_gfx_print("None Yet");
+        util_button_wait();
+        return;
+    }
+
+    for (uint16_t i = 1; i <= capture_state.max_index; i++) {
+        if (mbp_state_captured_is_captured(i)) {
+            if (!read_creature_data(i, &creature_data)) {
+                continue;
+            }
+
+            util_gfx_cursor_area_reset();
+            mbp_ui_cls();
+
+            background_was_running = mbp_background_led_running();
+            mbp_background_led_stop();
+            
+            util_gfx_set_font(FONT_LARGE);
+            util_gfx_set_color(COLOR_WHITE);
+            util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
+            util_gfx_print(creature_data.name);
+
+            //Print points
+            util_gfx_set_color(COLOR_RED);
+            sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
+            util_gfx_set_cursor(0, 117);
+            util_gfx_print(temp);
+
+            sprintf(temp, "CAPTURE/%04d.RAW", i);
+            button = notification_filebased_bling(temp, "BLING/CIRCLES.RGB", CAPTURE_BLING_DELAY);
+            util_button_clear();    //Clean up button state
+
+            switch (button) {
+            case BUTTON_MASK_UP:
+            case BUTTON_MASK_DOWN:
+            case BUTTON_MASK_LEFT:
+            case BUTTON_MASK_RIGHT:
+            case BUTTON_MASK_ACTION:
+                // user pressed a button
+                break; // stop displaying the bling
+            default:
+                continue; // it was a timeout
+                break;
+            }
+        }
+
+        //Only start background LED display if previously running
+        if (background_was_running) {
+            mbp_background_led_start();
+        }
+    }
+}

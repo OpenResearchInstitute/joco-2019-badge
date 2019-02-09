@@ -479,7 +479,11 @@ static void mbp_menu_bling() {
 	uint16_t unlock = mbp_state_unlock_get();
 
 	menu_t menu;
+#if INCLUDE_CAPTURE
+	menu_item_t items[49];
+#else
 	menu_item_t items[48];
+#endif
 	menu.items = items;
 	menu.selected = 0;
 	menu.top = 0;
@@ -498,6 +502,10 @@ static void mbp_menu_bling() {
 	items[menu.count++] = (menu_item_t ) { "Transio", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_transion, NULL };
 	items[menu.count++] = (menu_item_t ) { "Joco18", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_joco_2018, NULL };
 	items[menu.count++] = (menu_item_t ) { "Custom", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_custom, NULL };
+
+#if INCLUDE_CAPTURE
+	items[menu.count++] = (menu_item_t ) { "Capture", "MENU/WRENCH.ICO", NULL, &mbp_bling_captured, NULL };
+#endif
 
 	items[menu.count++] = (menu_item_t ) { "Skull", "MENU/SKLCROSgithubS.ICO", "MENU/SKLCROSS.PRV", &mbp_bling_skull_crossbones, NULL };
 	items[menu.count++] = (menu_item_t ) { "Flames", "MENU/FLAMES.ICO", "MENU/FLAMES.PRV", &mbp_bling_flames, NULL };

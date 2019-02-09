@@ -25,6 +25,9 @@
 #define NOTIFICATIONS_STATE_IN_PROGRESS 2
 #define NOTIFICATIONS_STATE_COMPLETE    3
 
+#define NOTIFICATION_UI_MARGIN         3
+#define NOTIFICATION_UI_MARGIN_RIGHT  12
+
 typedef struct {
 	void        (*p_notification_callback)(void);
 	uint32_t    timeout; // in seconds
