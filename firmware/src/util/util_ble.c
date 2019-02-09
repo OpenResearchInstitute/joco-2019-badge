@@ -398,7 +398,6 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 		} else if (badge.appearance == APPEARANCE_ID_CREATURE) {
 			// We've received an indication that there's a 'creature' in the area that can be captured.
 			// All we care about is the creature I(index), which is encoded in the name field
-			// xyzzy
 			capture_process_heard(badge.name);
 #endif
 	        }
@@ -415,6 +414,14 @@ static void __handle_advertisement(ble_gap_evt_adv_report_t *p_report) {
 										badge.rssi);
 
 	}	/* Done with processing advertisement from a badge. */
+
+#if INCLUDE_CAPTURE
+    if ( capture_internal_broadcast != 0) {
+        uint16_t tmp16 = capture_internal_broadcast;
+        capture_internal_broadcast = 0;
+		capture_process_heard_index(tmp16);
+    }
+#endif
 
 	// Handle beacon scanning
 	beacon_ble_on_ble_advertisement(p_report);

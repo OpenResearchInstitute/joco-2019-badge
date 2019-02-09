@@ -29,6 +29,8 @@ typedef struct {
 } capture_state_t;
 capture_state_t	capture_state;
 
+uint16_t capture_internal_broadcast;
+
 uint16_t __choose_creature(void);
 
 
@@ -144,6 +146,9 @@ static void __capture_timer_handler(void * p_data) {
 				capture_state.sending = true;
 				util_ble_on();
 
+                // Make it available to our own badge
+                capture_internal_broadcast = capture_state.c_index;
+
 				// Set countdown so we stop sending
 				capture_state.countdown = CAPTURE_SENDING_LENGTH;
 			} else {
@@ -185,7 +190,7 @@ void capture_init(void) {
 
 	creaturedat[CAPTURE_MAX_INDEX_DIGITS + 1] = 0; // provide a hard stop for strtol
 	uint32_t num_creatures = strtol(creaturedat, NULL, 10);
-	if (num_creatures > (CAPTURE_MAX_INDEX + 1)) {
+	if (num_creatures > CAPTURE_MAX_INDEX) {
 		return;
 	} else {
 		capture_state.max_index = (uint16_t) num_creatures;
@@ -225,8 +230,7 @@ uint16_t __choose_creature(void) {
 
 #else
 		// Generate a random number in the range of 1 <= index <= max_index
-		creature_id = util_math_rand16_max(capture_state.max_index-1);
-		creature_id++; // because 0 is invalid
+		creature_id = util_math_rand16_max(capture_state.max_index-1) + 1; // because 0 is invalid
 #endif
 		bool ok = read_creature_data(creature_id, &creature_data);
 		if (!ok) {
@@ -250,19 +254,12 @@ uint16_t __choose_creature(void) {
 	return 0;
 }
 
-void capture_process_heard(char *name) {
-	// Called when we've received a creature packet. If we haven't captured this creature, then
-	// trigger the display of a notification, allowing the user to capture the creature. We do not block here,
-	// so that we return to the ble advertising receive handler.
-	uint16_t creature_id;
-
+void capture_process_heard_index(uint16_t creature_id) {
 	// return if we're not ready to present another notification
 	if (notifications_state.state != NOTIFICATIONS_STATE_IDLE) {
 		return;
 	}
 
-	// parse the creature index from the name field
-	creature_id = decode_creature_name(name);
 	if ((creature_id > 0) && (creature_id <= capture_state.max_index)) {
 #if ! defined (DEBUG_CAPTURE_ALWAYS_SCORE)
 		if (mbp_state_captured_is_captured(creature_id)) {
@@ -281,6 +278,18 @@ void capture_process_heard(char *name) {
 
 	}
 }
+
+void capture_process_heard(char *name) {
+	// Called when we've received a creature packet. If we haven't captured this creature, then
+	// trigger the display of a notification, allowing the user to capture the creature. We do not block here,
+	// so that we return to the ble advertising receive handler. This should only be called from
+    // the ble advertising receive code, otherwise we have a race condition
+	uint16_t creature_id;
+
+	// parse the creature index from the name field
+	creature_id = decode_creature_name(name);
+    capture_process_heard_index(creature_id);
+    }
 
 void mbp_bling_captured(void *data) {
     // Display all captures creatures in sequence

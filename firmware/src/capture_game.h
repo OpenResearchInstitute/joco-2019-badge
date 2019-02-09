@@ -20,6 +20,8 @@
 #ifndef CAPTURE_GAME_H_
 #define CAPTURE_GAME_H_
 
+extern uint16_t capture_internal_broadcast;
+
 // Testing
 #define DEBUG_USE_SEQUENTIAL_CREATURES
 #define DEBUG_CAPTURE_ALWAYS_SCORE
@@ -45,7 +47,7 @@
 // Sending parameters
 // Remember when setting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
 // an opportunity at least this often. 
-//#define CAPTURE_FAST_TEST
+#define CAPTURE_FAST_TEST
 #ifdef CAPTURE_FAST_TEST
 #define CAPTURE_SENDING_INTERVAL 60
 #define CAPTURE_SENDING_INTERVAL_JITTER 0
@@ -73,6 +75,7 @@ extern uint16_t rarity_to_points(uint8_t);
 extern bool read_creature_data(uint16_t, creature_data_t *);
 extern void capture_init(void);
 extern bool capture_is_sending(void);
+extern void capture_process_heard_index(uint16_t);
 extern void capture_process_heard(char *name);
 extern void mbp_bling_captured(void *data);
 
