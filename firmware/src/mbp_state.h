@@ -48,7 +48,7 @@ typedef struct {
 	uint16_t game_score;
 	uint16_t unlock_state;
 	bool master_badge;
-	char pw_riley[9];
+	char pw_sabourin[10];
 	char pw_root[9];
 	uint16_t wall_current_spot;
 	char wall_messages[5][16];
@@ -73,8 +73,8 @@ extern bool mbp_state_load();
 extern void mbp_state_new();
 extern void mbp_state_save();
 
-extern void mbp_state_pw_riley_set(char *pw);
-extern void mbp_state_pw_riley_get(char *pw);
+extern void mbp_state_pw_sabourin_set(char *pw);
+extern void mbp_state_pw_sabourin_get(char *pw);
 extern void mbp_state_pw_root_set(char *pw);
 extern void mbp_state_pw_root_get(char *pw);
 

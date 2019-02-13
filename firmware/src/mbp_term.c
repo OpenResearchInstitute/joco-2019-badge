@@ -443,7 +443,7 @@ static int __cmd_defrag(int argc, char **argv) {
 
 static int __cmd_ll(int argc, char **argv) {
 	mbp_term_print("rw-rw----");
-	mbp_term_print("root riley ");
+	mbp_term_print("root sabourin");
 	mbp_term_print("/shadow.backup");
 	mbp_term_print("\r");
 	return 0;
@@ -497,13 +497,13 @@ static int __cmd_passwd(int argc, char **argv) {
 	if ((argc == 2) && (strlen(argv[1]) <= SETTING_PW_LENGTH - 1)) {
 		if (m_current_user_role == 0) {
 			mbp_term_print("Error!");
-			mbp_term_print("lid not allowed pw");
+			mbp_term_print("monkey not allowed pw");
 			mbp_term_print("He always forgets it");
 			mbp_term_print("\r");
 		}
 		else if (m_current_user_role == 1) {
-			//riley passwd
-			mbp_state_pw_riley_set(argv[1]);
+			//sabourin passwd
+			mbp_state_pw_sabourin_set(argv[1]);
 			mbp_term_print("Password Updated!");
 			mbp_term_print("\r");
 			mbp_state_save();
@@ -574,11 +574,11 @@ static int __cmd_less(int argc, char **argv) {
 			mbp_term_print("\r");
 		}
 		if ((strcmp(argv[1], "shadow.backup") == 0) && (m_current_user_role > 0)) {
-			mbp_term_print("#Backup for lid");
-			mbp_term_print("root:430efdc48f60562c1af830e6dac71126");	// royalty!
+			mbp_term_print("#Backup for monkey");
+			mbp_term_print("root:709168762854e89025a2c9e3eeb4bec2");	// Tortola!
 			mbp_term_print("\r");
 			//Create Root Password Hash https://md5hashing.net/hash
-			//Default Root Password = royalty!
+			//Default Root Password = Tortola!
 			//User must less the file and crack MD5 encrypted password
 			//Hope they change it...
 		}
@@ -599,8 +599,8 @@ static int __cmd_exit(int argc, char **argv) {
 		mbp_term_print("\r");
 		break;
 	case 1:
-		mbp_term_print("Session End: riley");
-		mbp_term_print("Current User: lid");
+		mbp_term_print("Session End: sabourin");
+		mbp_term_print("Current User: monkey");
 		mbp_term_print("\r");
 		m_current_user_role = 0; //always jump to lowest privilege on exit
 		break;
@@ -629,8 +629,8 @@ static int __cmd_stop(int argc, char **argv) {
 }
 
 static int __cmd_su(int argc, char **argv) {
-	char pw_riley[9];
-	mbp_state_pw_riley_get(pw_riley);
+	char pw_sabourin[10];
+	mbp_state_pw_sabourin_get(pw_sabourin);
 
 	char pw_root[9];
 	mbp_state_pw_root_get(pw_root);
@@ -642,18 +642,15 @@ static int __cmd_su(int argc, char **argv) {
 	}
 
 	if (argc == 3) {
-		if ((strcmp(argv[1], "riley") == 0) && (strcmp(argv[2], pw_riley) == 0)) {
+		if ((strcmp(argv[1], "sabourin") == 0) && (strcmp(argv[2], pw_sabourin) == 0)) {
 
-					mbp_term_print("Don’t engage ");
-					mbp_term_print("people and don't ");
-					mbp_term_print("humor the idiots. ");
-					mbp_term_print("Stupidity can’t ");
-					mbp_term_print("be regulated, no ");
-					mbp_term_print("matter how good ");
-					mbp_term_print("the rules are. ");
-					mbp_term_print("Just turn the big ");
-					mbp_term_print("knob. Every rig ");
-					mbp_term_print("has one.");
+					mbp_term_print("I asked you one time ");
+					mbp_term_print("You said you wouldn't see me ");
+					mbp_term_print("I asked you two times ");
+					mbp_term_print("You said you wouldn't see me ");
+					mbp_term_print("I asked you three times ");
+					mbp_term_print("You said you wouldn't see me ");
+					mbp_term_print("Now, what's a poor boy to do? ");
 					mbp_term_print("\r");
 					m_current_user_role = 1;
 		}

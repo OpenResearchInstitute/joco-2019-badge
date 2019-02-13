@@ -45,7 +45,7 @@
 #define SETTING_INPUT_MAX					8
 #define SETTING_NAME_DEFAULT				"Monkey"
 #define SETTING_NAME_LENGTH					11		// increased for DC26
-#define SETTING_PW_LENGTH					9
+#define SETTING_PW_LENGTH					10
 #define SETTING_CALLSIGN_LENGTH				7
 #define SETTING_AIRPLANE_MODE_DEFAULT		false
 #define SETTING_NIGHT_MODE_DEFAULT		false

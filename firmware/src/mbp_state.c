@@ -68,8 +68,8 @@ void mbp_state_new() {
 #endif
 	m_badge_state.game_incoming_ok = SETTING_GAME_INCOMING_OK_DEFAULT;
 
-	strcpy(m_badge_state.pw_riley, "part97");	// Hacker is expected to guess this one.
-	strcpy(m_badge_state.pw_root,  "royalty!");	// This one needn't be guessable.
+	strcpy(m_badge_state.pw_sabourin, "principal");	// Hacker is expected to guess this one.
+	strcpy(m_badge_state.pw_root,  "Tortola!");	// This one needn't be guessable.
 
 	strcpy(m_badge_state.wall_messages[0], "Msg 1 None");
 	strcpy(m_badge_state.wall_messages[1], "Msg 2 None");
@@ -345,12 +345,12 @@ void mbp_state_special_set(uint8_t special) {
 	util_ble_name_set(m_badge_state.name);
 }
 
-void mbp_state_pw_riley_set(char *pw) {
-	snprintf(m_badge_state.pw_riley, SETTING_PW_LENGTH, "%s", pw);
+void mbp_state_pw_sabourin_set(char *pw) {
+	snprintf(m_badge_state.pw_sabourin, SETTING_PW_LENGTH, "%s", pw);
 }
 
-void mbp_state_pw_riley_get(char *pw) {
-	snprintf(pw, SETTING_PW_LENGTH, "%s", m_badge_state.pw_riley);
+void mbp_state_pw_sabourin_get(char *pw) {
+	snprintf(pw, SETTING_PW_LENGTH, "%s", m_badge_state.pw_sabourin);
 }
 
 void mbp_state_pw_root_set(char *pw) {
