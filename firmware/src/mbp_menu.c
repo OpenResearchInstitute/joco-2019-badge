@@ -499,12 +499,12 @@ static void mbp_menu_bling() {
 	}
 */
 
-	items[menu.count++] = (menu_item_t ) { "Transio", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_transion, NULL };
-	items[menu.count++] = (menu_item_t ) { "Joco18", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_joco_2018, NULL };
-	items[menu.count++] = (menu_item_t ) { "Custom", "MENU/WRENCH.ICO", NULL, &mbp_bling_menu_custom, NULL };
+	items[menu.count++] = (menu_item_t ) { "Transio", "MENU/BLIING.ICO", NULL, &mbp_bling_menu_transion, NULL };
+	items[menu.count++] = (menu_item_t ) { "Joco18", "MENU/BLING.ICO", NULL, &mbp_bling_menu_joco_2018, NULL };
+	items[menu.count++] = (menu_item_t ) { "Custom", "MENU/BLING.ICO", NULL, &mbp_bling_menu_custom, NULL };
 
 #if INCLUDE_CAPTURE
-	items[menu.count++] = (menu_item_t ) { "Capture", "MENU/WRENCH.ICO", NULL, &mbp_bling_captured, NULL };
+	items[menu.count++] = (menu_item_t ) { "Capture", "MENU/BLING.ICO", NULL, &mbp_bling_captured, NULL };
 #endif
 
 	items[menu.count++] = (menu_item_t ) { "Skull", "MENU/SKLCROSgithubS.ICO", "MENU/SKLCROSS.PRV", &mbp_bling_skull_crossbones, NULL };
