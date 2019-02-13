@@ -30,7 +30,6 @@
  *****************************************************************************/
 #include "../system.h"
 
-static bool m_apa102 = false;
 static uint8_t leds[LED_COUNT * 3 * sizeof(uint8_t)];
 static bool m_leds_locked = false;
 
@@ -129,24 +128,9 @@ uint32_t util_led_hsv_to_rgb(float H, float S, float V) {
 	return RGB;
 }
 
-bool util_led_has_apa102() {
-	return m_apa102;
-}
-
 void util_led_init() {
 	memset(leds, 0x00, sizeof(uint8_t) * LED_COUNT * 3);
-
-	//If APA102.MBP exists, use the APA102 driver
-	FILINFO info;
-	FRESULT result = f_stat("APA102.MBP", &info);
-	m_apa102 = (result == FR_OK);
-
-	if (m_apa102) {
-		apa102_init();
-
-	} else {
-		ws2812b_init();
-	}
+    ws2812b_init();
 }
 
 void util_led_load_rgb_file(char *filename, led_anim_t *p_anim) {
@@ -209,12 +193,6 @@ void util_led_play_rgb_frame(led_anim_t *p_anim) {
 		return;
 	}
 
-	//MBP2 has eyes swapped
-	if (util_led_has_apa102()) {
-		rgb_led_mapping[0] = 13;
-		rgb_led_mapping[3] = 12;
-	}
-
 	uint16_t offset = p_anim->frame * LED_RGB_COUNT * 3;
 	for (uint8_t i = 0; i < LED_RGB_COUNT; i++) {
 		led_index = rgb_led_mapping[i];
@@ -275,11 +253,7 @@ void util_led_show() {
 		return;
 	}
 
-	if (m_apa102) {
-		apa102_send(leds);
-	} else {
-		ws2812b_send(leds);
-	}
+	ws2812b_send(leds);
 }
 
 uint32_t util_led_to_rgb(uint8_t red, uint8_t green, uint8_t blue) {

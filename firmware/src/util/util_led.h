@@ -93,7 +93,6 @@ extern void util_led_clear();
 extern led_rgb_t util_led_get(uint8_t index);
 extern uint32_t util_led_to_rgb(uint8_t red, uint8_t green, uint8_t blue);
 extern uint32_t util_led_hsv_to_rgb(float H, float S, float V);
-extern bool util_led_has_apa102();
 extern void util_led_init();
 extern void util_led_load_rgb_file(char *filename, led_anim_t *p_anim);
 extern void util_led_play_rgb_frame(led_anim_t *p_anim);

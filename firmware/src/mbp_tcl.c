@@ -786,13 +786,6 @@ void mbp_tcl_exec(char *p_code) {
 	tcl_register(&tcl, "i2c_get_byte", &__tcl_i2c_get_byte, 2, NULL);
 	tcl_register(&tcl, "i2c_write", &__tcl_i2c_write, -4, NULL);
 
-	//Setup IO pins for badges with WS2812B
-	if (!util_led_has_apa102()) {
-		for (uint8_t i = 0; i < IO_PIN_MAX; i++) {
-			nrf_gpio_cfg_output(m_io_pins[i]);
-		}
-	}
-
 	//Setup the screen
 	util_gfx_set_font(FONT_SMALL);
 	util_gfx_set_color(COLOR_WHITE);

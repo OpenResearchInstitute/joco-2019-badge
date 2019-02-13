@@ -97,7 +97,6 @@ SRC_FILES += \
 	beacon_ble.c \
 	capture_game.c \
 	chip8.c \
-	drv_apa102.c \
 	drv_st7735.c \
 	drv_ws2812b.c \
 	gamefile.c \

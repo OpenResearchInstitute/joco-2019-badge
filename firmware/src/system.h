@@ -143,7 +143,6 @@
 //FIRMWARE
 #include "beacon_ble.h"
 #include "chip8.h"
-#include "drv_apa102.h"
 #include "drv_st7735.h"
 #include "drv_ws2812b.h"
 #include "bling/mbp_bling.h"

@@ -26,7 +26,6 @@
  *****************************************************************************/
 
 /**
- * APA102 Driver
  *
  * This driver utilizes SPI2 on NRF52. IT IS LIMITED TO 20 LEDS! Limitation is due
  * to the fact that NRF52 can only transfer 255 bytes over SPI at a time. Any more
