@@ -147,7 +147,7 @@ void hello_background_handler(void * p_event_data, uint16_t event_size) {
 		switch (hello_company_id) {
 			case COMPANY_ID_TRANSIO:
 			case COMPANY_ID_TRANSIO_TMP:
-				__do_hello(hello_name, "JINTRO.RAW");
+				__do_hello(hello_name, "B2B/TRANSIO.RAW");
 				break;
 
 			case COMPANY_ID_JOCO:

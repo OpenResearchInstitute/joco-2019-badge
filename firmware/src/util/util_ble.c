@@ -31,7 +31,7 @@
 #include "../system.h"
 
 #define BLE_TX_POWER                  0                 // 0dbm gain
-#define DEVICE_NAME                   "TRANSIO18"
+#define DEVICE_NAME                   "JOCO19"
 #define APP_ADV_INTERVAL              0x0320            // Advertising interval in units of 0.625ms
 //#define APP_ADV_TIMEOUT_IN_SECONDS    180
 #define APP_FEATURE_NOT_SUPPORTED     BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2 // Reply when unsupported features are requested.
@@ -127,7 +127,7 @@ static void __advertising_init(void) {
 	uint32_t err_code;
 	uint16_t device_id = util_get_device_id();
 
-	m_manuf_data.company_identifier = COMPANY_ID_TRANSIO;
+	m_manuf_data.company_identifier = COMPANY_ID_JOCO;
 	m_manuf_data.data.p_data = (uint8_t *) malloc(BLE_DATA_LEN);
 	memset(m_manuf_data.data.p_data, 0, BLE_DATA_LEN);
 	m_manuf_data.data.size = BLE_DATA_LEN;
@@ -1001,7 +1001,7 @@ char *util_ble_company_id_to_string(uint16_t company_id) {
 			return "TransIonospheric";
 
 		case COMPANY_ID_JOCO:
-			return "JoCo 2018";
+			return "JoCo";
 
 		case COMPANY_ID_ANDNXOR:
 			return "AND!XOR";
