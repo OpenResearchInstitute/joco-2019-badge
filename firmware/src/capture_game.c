@@ -29,6 +29,8 @@ typedef struct {
 } capture_state_t;
 capture_state_t	capture_state;
 
+char tmp_fname[20];
+
 uint16_t capture_internal_broadcast;
 
 uint16_t __choose_creature(void);
@@ -61,13 +63,12 @@ uint16_t rarity_to_points(uint8_t percent) {
 }
 
 void __write_bad_file_flag(uint16_t index, char *text) {
-	char fname[20];
 	FIL file;
 	UINT count;
 	FRESULT result;
 
-	sprintf(fname, "CAPTURE/%04d.BAD", index);
-	result = f_open(&file, fname, FA_CREATE_NEW | FA_WRITE);
+	sprintf(tmp_fname, "CAPTURE/%04d.BAD", index);
+	result = f_open(&file, tmp_fname, FA_CREATE_NEW | FA_WRITE);
 	if (result != FR_OK) {
 		// probably FR_EXIST, but we ignore all errors
 		return;
@@ -80,11 +81,10 @@ void __write_bad_file_flag(uint16_t index, char *text) {
 
 bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
-	char fname[20];
 
 	// read the data file for that creature
-	sprintf(fname, "CAPTURE/%04d.DAT", id);
-	FRESULT result = util_sd_load_file(fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
+	sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
+	FRESULT result = util_sd_load_file(tmp_fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
 	if (result != FR_OK) {
 		__write_bad_file_flag(id, "read");
 		return false;
@@ -293,7 +293,7 @@ void capture_process_heard(char *name) {
 
 void mbp_bling_captured(void *data) {
     // Display all captures creatures in sequence
-    char temp[32];
+    char temp[20];
 
     uint8_t button;
     bool background_was_running;

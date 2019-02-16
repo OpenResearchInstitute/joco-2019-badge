@@ -32,7 +32,7 @@ void capture_notification_callback() {
     // This should only be called when it is OK to display a notification.
 
     //buffer for formatting text
-    char temp[32];
+    char temp[20];
 
     uint8_t button;
     bool background_was_running;
@@ -47,6 +47,7 @@ void capture_notification_callback() {
 
     notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
 
+    // Read creatre data to get name and percentage, which translates to score
     bool ok = read_creature_data(notifications_state.user_data, &creature_data);
     if (!ok) {
         // not much we can do, so don't display the notification
