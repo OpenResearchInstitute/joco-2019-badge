@@ -28,6 +28,7 @@ void notifications_init() {
     return;
 }
 
+#if INCLUDE_CAPTURE
 void capture_notification_callback() {
     // This should only be called when it is OK to display a notification.
 
@@ -120,3 +121,4 @@ void capture_notification_callback() {
 
     return;
 }
+#endif // INCLUDE_CAPTURE

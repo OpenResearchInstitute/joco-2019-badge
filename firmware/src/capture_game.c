@@ -19,6 +19,7 @@
  *****************************************************************************/
 
 #include "system.h"
+#if INCLUDE_CAPTURE
 
 typedef struct {
 	bool        initialized;
@@ -172,7 +173,7 @@ static void __capture_timer_handler(void * p_data) {
 			}
 		}
 	}
-	app_sched_execute();
+//	app_sched_execute();
 }
 
 void capture_init(void) {
@@ -217,41 +218,41 @@ uint16_t __choose_creature(void) {
 	static uint16_t seq_id = 1;
 #endif
 
-	uint8_t ttl = 50;
-	bool creature_found = false;
+	uint8_t ttl = 20;
 	uint16_t creature_id = 0; // 0 is invalid
 	creature_data_t creature_data;
-	while ((!creature_found) && (--ttl > 0)) {
+	while ((creature_id == 0) && (--ttl > 0)) {
 #ifdef DEBUG_USE_SEQUENTIAL_CREATURES
 		creature_id = seq_id++;
 		if (seq_id > capture_state.max_index) {
 			seq_id = 1;
 		}
-
 #else
 		// Generate a random number in the range of 1 <= index <= max_index
 		creature_id = util_math_rand16_max(capture_state.max_index-1) + 1; // because 0 is invalid
 #endif
 		bool ok = read_creature_data(creature_id, &creature_data);
-		if (!ok) {
-			return 0;
-		}
+        if (ok) {
 
-		if ((creature_data.percent > 0) && (creature_data.percent <= 100)) {
-			uint32_t chance;
-			chance = util_math_rand32_max(100);
-			if (creature_data.percent >= chance) {
-				return creature_id;
-			} else {
-				return 0;
-			}
-		} else {
-			__write_bad_file_flag(creature_id, "percent");
-			return 0;
-		}
+            if ((creature_data.percent > 0) && (creature_data.percent <= 100)) {
+                uint32_t chance;
+                chance = util_math_rand32_max(100);
+                if (creature_data.percent >= chance) {
+                    return creature_id;
+                } else {
+                    creature_id = 0;
+                }
+            } else {
+                __write_bad_file_flag(creature_id, "percent");
+                creature_id = 0;
+            }
+        } else {
+            // we couldn't read creature data from SD card
+            creature_id = 0;
+        }
 	}
 
-	return 0;
+	return creature_id;
 }
 
 void capture_process_heard_index(uint16_t creature_id) {
@@ -357,3 +358,4 @@ void mbp_bling_captured(void *data) {
         }
     }
 }
+#endif //INCLUDE_CAPTURE

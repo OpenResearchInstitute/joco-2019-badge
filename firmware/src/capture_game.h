@@ -19,6 +19,7 @@
  *****************************************************************************/
 #ifndef CAPTURE_GAME_H_
 #define CAPTURE_GAME_H_
+#if INCLUDE_CAPTURE
 
 extern uint16_t capture_internal_broadcast;
 
@@ -81,3 +82,4 @@ extern void mbp_bling_captured(void *data);
 
 
 #endif /* CAPTURE_GAME_H_ */
+#endif //INCLUDE_CAPTURE
