@@ -83,11 +83,13 @@ bool util_sd_init() {
 	}
 
 	//Check version metadata
-	char version_data[32];
-	FRESULT result = util_sd_load_file("VERSION", (uint8_t *) version_data, 32);
+	char version_data[33];
+	uint16_t bytes_read;
+	FRESULT result = util_sd_load_file("VERSION", (uint8_t *) version_data, 32, &bytes_read);
 	if (result != FR_OK) {
 		return false;
 	}
+	version_data[bytes_read] = '\0';
 	uint32_t version_number = strtol(version_data + 8, NULL, 10);
 	if (version_number < VERSION_SD) {
 		mbp_ui_error("SD data version mismatch. Please update.");
@@ -117,7 +119,7 @@ uint32_t util_sd_file_size(char *path) {
 /**
  * Read a file completely into memory, careful!
  */
-FRESULT util_sd_load_file(char *path, uint8_t *p_buffer, uint32_t count) {
+FRESULT util_sd_load_file(char *path, uint8_t *p_buffer, uint16_t max_length, uint16_t *bytesread_out) {
 	FIL file;
 
 	FRESULT result = f_open(&file, path, FA_READ | FA_OPEN_EXISTING);
@@ -126,7 +128,10 @@ FRESULT util_sd_load_file(char *path, uint8_t *p_buffer, uint32_t count) {
 	}
 
 	UINT bytesread = 0;
-	result = f_read(&file, p_buffer, count, &bytesread);
+	result = f_read(&file, p_buffer, max_length, &bytesread);
+	if (bytesread_out) {
+		*bytesread_out = bytesread;
+	}
 
 	f_close(&file);
 	return result;

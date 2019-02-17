@@ -82,16 +82,17 @@ void __write_bad_file_flag(uint16_t index, char *text) {
 
 bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
+	uint16_t bytes_read;
 
 	// read the data file for that creature
 	sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
-	FRESULT result = util_sd_load_file(tmp_fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN);
+	FRESULT result = util_sd_load_file(tmp_fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN, &bytes_read);
 	if (result != FR_OK) {
 		__write_bad_file_flag(id, "read");
 		return false;
 	}
 	// Parse the data file. the name is first and ends in a newline (0x0A)
-	file_data[CAPTURE_MAX_DAT_FILE_LEN] = 0;
+	file_data[bytes_read] = 0;
 	uint16_t cctr = 0;
 	char *pch = &file_data[0];
 	char *pdst = &creature_data->name[0];
@@ -184,12 +185,13 @@ void capture_init(void) {
 
 	// Find out how many creatures we have available to send
 	char creaturedat[CAPTURE_MAX_INDEX_DIGITS + 2];
-	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1);
+	uint16_t bytes_read;
+	FRESULT result = util_sd_load_file("CAPTURE/NUM.DAT", (uint8_t *) creaturedat, CAPTURE_MAX_INDEX_DIGITS + 1, &bytes_read);
 	if (result != FR_OK) {
 		return;
 	}
 
-	creaturedat[CAPTURE_MAX_INDEX_DIGITS + 1] = 0; // provide a hard stop for strtol
+	creaturedat[bytes_read] = 0; // provide a hard stop for strtol
 	uint32_t num_creatures = strtol(creaturedat, NULL, 10);
 	if (num_creatures > CAPTURE_MAX_INDEX) {
 		return;

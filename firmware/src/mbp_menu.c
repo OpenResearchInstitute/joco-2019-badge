@@ -119,7 +119,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 	int16_t selected_button = 0;
 	uint8_t max_visible_buttons = MIN(p_menu->count, MAX_ITEMS);
 
-	uint32_t size = MENU_ICON_SIZE * MENU_ICON_SIZE * 2;
+	uint16_t size = MENU_ICON_SIZE * MENU_ICON_SIZE * 2;
 	uint8_t text_offset = 11;
 	uint8_t icons[MAX_ITEMS][size];	// Only the ones on screen now
     uint8_t button;
@@ -130,7 +130,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 	//Preload icons for the first screenful of the menu
 	for (uint8_t i = 0; i < p_menu->count && i < MAX_ITEMS; i++) {
 		if (p_menu->items[i].icon != NULL) {
-			util_sd_load_file(p_menu->items[i].icon, icons[i], size);
+			util_sd_load_file(p_menu->items[i].icon, icons[i], size, NULL);
 		}
 	}
 
@@ -215,7 +215,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 					p_menu->top++;
 					memmove(icons[0], icons[1], size * (MAX_ITEMS-1));
 					if (p_menu->items[p_menu->selected].icon != NULL) {
-						util_sd_load_file(p_menu->items[p_menu->selected].icon, icons[MAX_ITEMS-1], size);
+						util_sd_load_file(p_menu->items[p_menu->selected].icon, icons[MAX_ITEMS-1], size, NULL);
 					}
 				}
 
@@ -234,7 +234,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
 					p_menu->top--;
 					memmove(icons[1], icons[0], size * (MAX_ITEMS-1));
 					if (p_menu->items[p_menu->selected].icon != NULL) {
-						util_sd_load_file(p_menu->items[p_menu->selected].icon, icons[0], size);
+						util_sd_load_file(p_menu->items[p_menu->selected].icon, icons[0], size, NULL);
 					}
 				}
 

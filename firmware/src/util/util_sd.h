@@ -28,7 +28,7 @@
 
 extern bool util_sd_available();
 extern uint32_t util_sd_file_size(char *path);
-extern FRESULT util_sd_load_file(char *path, uint8_t *p_buffer, uint32_t count);
+extern FRESULT util_sd_load_file(char *path, uint8_t *p_buffer, uint16_t max_length, uint16_t *bytesread_out);
 extern bool util_sd_init();
 extern uint16_t util_sd_read_16(FIL *p_file);
 extern uint32_t util_sd_read_32(FIL *p_file);
