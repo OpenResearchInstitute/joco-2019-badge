@@ -48,12 +48,19 @@ void capture_notification_callback() {
 
     notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
 
-    // Read creatre data to get name and percentage, which translates to score
+    // Validate that the creature index is in range
+    if (notifications_state.user_data > capture_max_index()) {
+        notifications_state.button_value = BUTTON_MASK_SPECIAL;;
+        notifications_state.state = NOTIFICATIONS_STATE_IDLE;
+        return;
+    }
+
+    // Read creature data to get name and percentage, which translates to score
     bool ok = read_creature_data(notifications_state.user_data, &creature_data);
     if (!ok) {
         // not much we can do, so don't display the notification
         notifications_state.button_value = BUTTON_MASK_SPECIAL;;
-        notifications_state.state = NOTIFICATIONS_STATE_COMPLETE;
+        notifications_state.state = NOTIFICATIONS_STATE_IDLE;
         return;
     }
 
@@ -98,7 +105,6 @@ void capture_notification_callback() {
     case BUTTON_MASK_RIGHT:
     case BUTTON_MASK_ACTION:
         // user pressed a button
-        ok = read_creature_data(notifications_state.user_data, &creature_data);
         if (ok) {
             // add to score
             add_to_score(rarity_to_points(creature_data.percent), creature_data.name);

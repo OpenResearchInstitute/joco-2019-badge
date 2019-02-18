@@ -75,6 +75,7 @@ extern uint16_t decode_creature_name(char *);
 extern uint16_t rarity_to_points(uint8_t);
 extern bool read_creature_data(uint16_t, creature_data_t *);
 extern void capture_init(void);
+extern uint16_t capture_max_index(void);
 extern bool capture_is_sending(void);
 extern void capture_process_heard_index(uint16_t);
 extern void capture_process_heard(char *name);

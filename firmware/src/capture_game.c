@@ -209,6 +209,15 @@ void capture_init(void) {
 	APP_ERROR_CHECK(err_code);
 }
 
+uint16_t capture_max_index() {
+    if (capture_state.initialized) {
+        return capture_state.max_index;
+    } else {
+        return 0;
+    }
+}
+
+
 bool capture_is_sending() {
 	return capture_state.sending;
 }
