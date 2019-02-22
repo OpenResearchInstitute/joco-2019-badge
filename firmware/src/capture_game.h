@@ -39,7 +39,7 @@ extern uint16_t capture_internal_broadcast;
 #define CAPTURE_TIMER_INTERVAL 1000 // milliSeconds
 #define CAPTURE_MAX_NAME_LEN 10
 #define CAPTURE_MAX_INDEX_DIGITS 4
-#define CAPTURE_MAX_DAT_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
+#define CAPTURE_MAX_DATA_FILE_LEN (CAPTURE_MAX_NAME_LEN + CAPTURE_MAX_INDEX_DIGITS + 2) // data plus one or two line feeds
 
 // Scoring
 #define POINTS_4_CAPTURE 100

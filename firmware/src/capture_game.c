@@ -63,35 +63,48 @@ uint16_t rarity_to_points(uint8_t percent) {
 	return (POINTS_4_CAPTURE + ((100 - percent) * POINTS_4_RARITY));
 }
 
-void __write_bad_file_flag(uint16_t index, char *text) {
-	FIL file;
-	UINT count;
-	FRESULT result;
-
-	sprintf(tmp_fname, "CAPTURE/%04d.BAD", index);
-	result = f_open(&file, tmp_fname, FA_CREATE_NEW | FA_WRITE);
-	if (result != FR_OK) {
-		// probably FR_EXIST, but we ignore all errors
-		return;
-	}
-
-	result = f_write(&file, (void *) text, strlen(text), &count); // ignore result
-
-	result = f_close(&file);
-}
-
 bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
-	char file_data[CAPTURE_MAX_DAT_FILE_LEN+1];
-	uint16_t bytes_read;
+	char file_data[CAPTURE_MAX_DATA_FILE_LEN+1];
+	UINT bytes_read;
+    FRESULT result;
+    FIL dat_file;
 
+    printf("reading %d\n", id);
 	// read the data file for that creature
+    // This seemed to fail often and end in a bad file system state
+    // So, copy the recover code from util_gfx.c
 	sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
-	FRESULT result = util_sd_load_file(tmp_fname, (uint8_t *) file_data, CAPTURE_MAX_DAT_FILE_LEN, &bytes_read);
+
+	result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
 	if (result != FR_OK) {
-		__write_bad_file_flag(id, "read");
+        printf("could not open %s\n", tmp_fname);
 		return false;
 	}
+
+    result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
+
+    //Check for error
+    if (result != FR_OK) {
+        printf("retrying file %s\n", tmp_fname);
+        CRITICAL_REGION_ENTER();
+        nrf_delay_ms(2000);
+        util_sd_recover();
+        CRITICAL_REGION_EXIT();
+
+        result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
+        if (result != FR_OK) {
+            printf("Could not open %s.", tmp_fname);
+            return false;
+        }
+        result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
+        if (result != FR_OK) {
+            printf("could not read %s on 2nd try\n", tmp_fname);
+            return false;
+        }
+    }
+
 	// Parse the data file. the name is first and ends in a newline (0x0A)
+    printf("read %d bytes of %s\n", bytes_read, tmp_fname);
 	file_data[bytes_read] = 0;
 	uint16_t cctr = 0;
 	char *pch = &file_data[0];
@@ -104,7 +117,7 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	}
 
 	if (cctr >= CAPTURE_MAX_NAME_LEN) {
-		__write_bad_file_flag(id, "name");
+        printf("excessive name length in %s\n", tmp_fname);
 		return false;
 	} else {
         *pdst = 0; // null terminate the name string
@@ -123,8 +136,31 @@ static void __capture_timer_handler(void * p_data) {
 
 	// This should fire once per second. It handles one task, which is deciding whethre to broadcast a creature
 	if (capture_state.initialized) {
-		// If it's time to send a random creature, do that
-		if (--capture_state.countdown == 0) {
+        if (notifications_state.state == NOTIFICATIONS_STATE_INITIATED) {
+            /*
+             * We handle this step in the timer handler here because it requires reading the
+             * creature data with a call to read_creature_data(). The only other place that creature data is
+             * also in this timer handler. This is because the fatfs code is not re-entrant for operations on
+             * the same file, and it has proven to be true that we can receive a creature advertisement for
+             * a creature ID and also be in th eprocess of picking that one to randomly send. Having both
+             * calls to read_creature_data() in this handler avoids a re-entrancy problem.
+             */
+            creature_data_t creature_data;
+            // creature index is already populated in notification state, fill in the name and percentage
+            bool ok = read_creature_data(notifications_state.creature_index, &creature_data);
+            if (ok) {
+                notifications_state.creature_percent = creature_data.percent;
+                strncpy(notifications_state.creature_name, creature_data.name, CAPTURE_MAX_NAME_LEN + 1);
+                notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
+            } else {
+                // we can't display this notification
+                printf("Not notifying %d\n", notifications_state.creature_index);
+                notifications_state.state = NOTIFICATIONS_STATE_IDLE;
+            }
+        }
+
+        if (--capture_state.countdown == 0) {
+            // If it's time to send a random creature, do that
 			if (!capture_state.sending) {
 				// Set up to send some advertising packets identifying as a creature, instead of our normal info
 				// Select a creature ID to send
@@ -254,7 +290,7 @@ uint16_t __choose_creature(void) {
                     creature_id = 0;
                 }
             } else {
-                __write_bad_file_flag(creature_id, "percent");
+                printf("bad percentage in for creature ID %d\n", creature_data.percent);
                 creature_id = 0;
             }
         } else {
@@ -279,15 +315,18 @@ void capture_process_heard_index(uint16_t creature_id) {
 			return;
 		}
 #endif
+        if (notifications_state.creature_index == creature_id) {
+            // this is the same one we last notified for, skip it
+            return;
+        }
 		notifications_state.p_notification_callback = capture_notification_callback;
 
 		// possibly TODO make changes in LED flash appearance based on how rare it is
 		notifications_state.timeout = CAPTURE_UNSEEN_NOTIFICATION_DISPLAY_LENGTH;
         strcpy(notifications_state.led_filename, "BLING/KIT.RGB");
 
-		notifications_state.user_data = creature_id;
-		notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
-
+		notifications_state.creature_index = creature_id;
+		notifications_state.state = NOTIFICATIONS_STATE_INITIATED;
 	}
 }
 

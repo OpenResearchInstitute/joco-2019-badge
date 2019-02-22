@@ -38,9 +38,6 @@ void capture_notification_callback() {
     uint8_t button;
     bool background_was_running;
 
-    creature_data_t creature_data;
-
-    
     // make sure we have a request pending
     if (notifications_state.state != NOTIFICATIONS_STATE_REQUESTED) {
         return; // This is an error
@@ -49,16 +46,7 @@ void capture_notification_callback() {
     notifications_state.state = NOTIFICATIONS_STATE_IN_PROGRESS;
 
     // Validate that the creature index is in range
-    if (notifications_state.user_data > capture_max_index()) {
-        notifications_state.button_value = BUTTON_MASK_SPECIAL;;
-        notifications_state.state = NOTIFICATIONS_STATE_IDLE;
-        return;
-    }
-
-    // Read creature data to get name and percentage, which translates to score
-    bool ok = read_creature_data(notifications_state.user_data, &creature_data);
-    if (!ok) {
-        // not much we can do, so don't display the notification
+    if (notifications_state.creature_index > capture_max_index()) {
         notifications_state.button_value = BUTTON_MASK_SPECIAL;;
         notifications_state.state = NOTIFICATIONS_STATE_IDLE;
         return;
@@ -84,15 +72,15 @@ void capture_notification_callback() {
     util_gfx_set_font(FONT_LARGE);
     util_gfx_set_color(COLOR_WHITE);
     util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
-    util_gfx_print(creature_data.name);
+    util_gfx_print(notifications_state.creature_name);
 
     //Print points
     util_gfx_set_color(COLOR_RED);
-    sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
+    sprintf(temp, "POINTS: %u",  rarity_to_points(notifications_state.creature_percent));
     util_gfx_set_cursor(0, 117);
     util_gfx_print(temp);
 
-    sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.user_data);
+    sprintf(temp, "CAPTURE/%04d.RAW", notifications_state.creature_index);
     button = notification_filebased_bling(temp, notifications_state.led_filename, (notifications_state.timeout * 1000));
 
     notifications_state.button_value = button;
@@ -104,14 +92,10 @@ void capture_notification_callback() {
     case BUTTON_MASK_LEFT:
     case BUTTON_MASK_RIGHT:
     case BUTTON_MASK_ACTION:
-        // user pressed a button
-        if (ok) {
-            // add to score
-            add_to_score(rarity_to_points(creature_data.percent), creature_data.name);
-            mbp_state_capture_set_captured(notifications_state.user_data);
-            mbp_state_capture_count_increment();
-            notifications_state.user_data = 0;
-        }
+        // user pressed a button, add to score
+        add_to_score(rarity_to_points(notifications_state.creature_percent), notifications_state.creature_name);
+        mbp_state_capture_set_captured(notifications_state.creature_index);
+        mbp_state_capture_count_increment();
         break;
     default:
         // zero means a timeout
