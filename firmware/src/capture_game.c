@@ -31,8 +31,8 @@ typedef struct {
 capture_state_t	capture_state;
 
 char tmp_fname[20];
-
 uint16_t capture_internal_broadcast;
+uint16_t dupe_cooldown = 0;
 
 uint16_t __choose_creature(void);
 
@@ -133,6 +133,12 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 
 static void __capture_timer_handler(void * p_data) {
 	char name[SETTING_NAME_LENGTH];
+
+    if (dupe_cooldown > 0) {
+        dupe_cooldown--;
+    } else if (dupe_cooldown > CAPTURE_DUPE_COOLDOWN) {
+        dupe_cooldown = CAPTURE_DUPE_COOLDOWN; // just in case we have a decrement race
+    }
 
 	// This should fire once per second. It handles one task, which is deciding whethre to broadcast a creature
 	if (capture_state.initialized) {
@@ -315,7 +321,7 @@ void capture_process_heard_index(uint16_t creature_id) {
 			return;
 		}
 #endif
-        if (notifications_state.creature_index == creature_id) {
+        if ((notifications_state.creature_index == creature_id) && (dupe_cooldown > 0)) {
             // this is the same one we last notified for, skip it
             return;
         }
@@ -326,6 +332,7 @@ void capture_process_heard_index(uint16_t creature_id) {
         strcpy(notifications_state.led_filename, "BLING/KIT.RGB");
 
 		notifications_state.creature_index = creature_id;
+        dupe_cooldown = CAPTURE_DUPE_COOLDOWN;
 		notifications_state.state = NOTIFICATIONS_STATE_INITIATED;
 	}
 }

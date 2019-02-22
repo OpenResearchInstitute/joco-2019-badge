@@ -59,6 +59,9 @@ extern uint16_t capture_internal_broadcast;
 #define CAPTURE_SENDING_LENGTH 6
 #endif
 
+// cooldown during which we will not notify for th emost recently heard creature
+#define CAPTURE_DUPE_COOLDOWN 60
+
 typedef struct {
 	char        name[CAPTURE_MAX_NAME_LEN + 1];
 	uint8_t     percent;
