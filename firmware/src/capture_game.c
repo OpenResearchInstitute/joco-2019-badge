@@ -77,15 +77,24 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 
 	result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
 	if (result != FR_OK) {
-        printf("could not open %s\n", tmp_fname);
-		return false;
+        printf("retrying fopen %s\n", tmp_fname);
+        CRITICAL_REGION_ENTER();
+        nrf_delay_ms(2000);
+        util_sd_recover();
+        CRITICAL_REGION_EXIT();
+
+        result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
+        if (result != FR_OK) {
+            printf("Could not fopen %s on second try.", tmp_fname);
+            return false;
+        }
 	}
 
     result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
 
     //Check for error
     if (result != FR_OK) {
-        printf("retrying file %s\n", tmp_fname);
+        printf("retrying fread %s\n", tmp_fname);
         CRITICAL_REGION_ENTER();
         nrf_delay_ms(2000);
         util_sd_recover();
