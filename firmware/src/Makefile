@@ -264,7 +264,7 @@ CFLAGS += -DSWI_DISABLE0
 CFLAGS += -DSOFTDEVICE_PRESENT
 # Enable logging over RTT via USB (see NRF_LOG())
 # Comment this out to disable logging in case that causes a performance hit.
-CFLAGS += -DNRF_LOG_USES_RTT
+CFLAGS += -DNRF_LOG_USES_RTT=1
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs --std=gnu99
 CFLAGS +=  -Wall -Werror -O0 -g3

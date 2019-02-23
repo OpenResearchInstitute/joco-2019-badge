@@ -76,7 +76,10 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
 
 	result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
-	if (result != FR_OK) {
+   	if (result != FR_OK) {
+        return false;
+    }
+/*   	if (result != FR_OK) {
         printf("retrying fopen %s\n", tmp_fname);
         CRITICAL_REGION_ENTER();
         nrf_delay_ms(2000);
@@ -89,7 +92,7 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
             return false;
         }
 	}
-
+*/
     result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
 
     //Check for error
@@ -108,9 +111,11 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
         result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
         if (result != FR_OK) {
             printf("could not read %s on 2nd try\n", tmp_fname);
+            f_close(&dat_file);
             return false;
         }
     }
+    f_close(&dat_file);
 
 	// Parse the data file. the name is first and ends in a newline (0x0A)
     printf("read %d bytes of %s\n", bytes_read, tmp_fname);
