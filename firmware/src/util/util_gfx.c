@@ -525,6 +525,7 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 
 				//Check for error
 				if (result != FR_OK) {
+                    printf("Critical section");
 					CRITICAL_REGION_ENTER();
 					nrf_delay_ms(2000);
 					util_sd_recover();
@@ -594,6 +595,7 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
 //		}
 
 	} while (loop && !m_stop);
+    f_close(&raw_file);
 
 	//Hang out until LCD is free
 	while (st7735_is_busy()) {
