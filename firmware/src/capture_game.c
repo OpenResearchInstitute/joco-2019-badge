@@ -79,7 +79,7 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 
     retry = 4;
     done = false;
-    while ((!done) &&(retry--)) {
+    while ((!done) &&(retry-- > 0)) {
         result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
         if (result == FR_OK) {
             result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
