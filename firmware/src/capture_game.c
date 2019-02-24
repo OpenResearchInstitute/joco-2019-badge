@@ -66,6 +66,8 @@ uint16_t rarity_to_points(uint8_t percent) {
 bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	char file_data[CAPTURE_MAX_DATA_FILE_LEN+1];
 	UINT bytes_read;
+    uint16_t retry;
+    bool done;
     FRESULT result;
     FIL dat_file;
 
@@ -75,50 +77,32 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     // So, copy the recover code from util_gfx.c
 	sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
 
-	result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
-   	if (result != FR_OK) {
-        return false;
-    }
-/*   	if (result != FR_OK) {
-        printf("retrying fopen %s\n", tmp_fname);
-        CRITICAL_REGION_ENTER();
-        nrf_delay_ms(2000);
-        util_sd_recover();
-        CRITICAL_REGION_EXIT();
-
+    retry = 4;
+    done = false;
+    while ((!done) &&(retry--)) {
         result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
-        if (result != FR_OK) {
-            printf("Could not fopen %s on second try.", tmp_fname);
-            return false;
+        if (result == FR_OK) {
+            result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
+            if (result == FR_OK) {
+                printf("read %d bytes of %s\n", bytes_read, tmp_fname);
+                done = true;
+            }
         }
-	}
-*/
-    result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
-
-    //Check for error
-    if (result != FR_OK) {
-        printf("retrying fread %s\n", tmp_fname);
-        CRITICAL_REGION_ENTER();
-        nrf_delay_ms(2000);
-        util_sd_recover();
-        CRITICAL_REGION_EXIT();
-
-        result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
-        if (result != FR_OK) {
-            printf("Could not open %s.", tmp_fname);
-            return false;
-        }
-        result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
-        if (result != FR_OK) {
-            printf("could not read %s on 2nd try\n", tmp_fname);
-            f_close(&dat_file);
-            return false;
+        if (!done) {
+            nrf_delay_ms(500);
         }
     }
+
     f_close(&dat_file);
 
+    if (!done) {
+        printf("read_creature_data %s failed\n", tmp_fname);
+        return false;
+    } else {
+        printf("read_creature_data %s success, %d\n", tmp_fname, retry);
+    }
+
 	// Parse the data file. the name is first and ends in a newline (0x0A)
-    printf("read %d bytes of %s\n", bytes_read, tmp_fname);
 	file_data[bytes_read] = 0;
 	uint16_t cctr = 0;
 	char *pch = &file_data[0];
