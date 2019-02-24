@@ -168,31 +168,35 @@ static void __capture_timer_handler(void * p_data) {
 			if (!capture_state.sending) {
 				// Set up to send some advertising packets identifying as a creature, instead of our normal info
 				// Select a creature ID to send
-				do {
-					capture_state.c_index = __choose_creature();
-				} while (capture_state.c_index == 0);
+				capture_state.c_index = __choose_creature();
+				if (capture_state.c_index == 0) {
+                    // Set countdown to start next sending time
+                    capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
+                    capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+                } else {
 
-				// Encode it into the name field
-				__encode_name(capture_state.c_index, name);
+                    // Encode it into the name field
+                    __encode_name(capture_state.c_index, name);
 
-				// Disable advertising
-				util_ble_off();
+                    // Disable advertising
+                    util_ble_off();
 
-				// Change the Appearance ID to make this a 'creature' advertisement
-				util_ble_appearance_set(APPEARANCE_ID_CREATURE);
+                    // Change the Appearance ID to make this a 'creature' advertisement
+                    util_ble_appearance_set(APPEARANCE_ID_CREATURE);
 
-				// The field is seven characters long, and has leading and trailing nulls
-				util_ble_name_set_special(name, 7);
+                    // The field is seven characters long, and has leading and trailing nulls
+                    util_ble_name_set_special(name, 7);
 
-				// Enable advertising
-				capture_state.sending = true;
-				util_ble_on();
+                    // Enable advertising
+                    capture_state.sending = true;
+                    util_ble_on();
 
-                // Make it available to our own badge
-                capture_internal_broadcast = capture_state.c_index;
+                    // Make it available to our own badge
+                    capture_internal_broadcast = capture_state.c_index;
 
-				// Set countdown so we stop sending
-				capture_state.countdown = CAPTURE_SENDING_LENGTH;
+                    // Set countdown so we stop sending
+                    capture_state.countdown = CAPTURE_SENDING_LENGTH;
+                }
 			} else {
 				// Disable advertising
 				util_ble_off();
