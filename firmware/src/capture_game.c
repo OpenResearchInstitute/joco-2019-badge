@@ -21,6 +21,8 @@
 #include "system.h"
 #if INCLUDE_CAPTURE
 
+//#define USE_PRINTS
+
 typedef struct {
 	bool        initialized;
 	bool	    sending;
@@ -71,7 +73,10 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     FRESULT result;
     FIL dat_file;
 
+#ifdef USE_PRINTS
     printf("reading %d\n", id);
+#endif
+
 	// read the data file for that creature
     // This seemed to fail often and end in a bad file system state
     // So, copy the recover code from util_gfx.c
@@ -84,7 +89,9 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
         if (result == FR_OK) {
             result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
             if (result == FR_OK) {
+#ifdef USE_PRINTS
                 printf("read %d bytes of %s\n", bytes_read, tmp_fname);
+#endif
                 done = true;
             }
         }
@@ -96,10 +103,14 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     f_close(&dat_file);
 
     if (!done) {
+#ifdef USE_PRINTS
         printf("read_creature_data %s failed\n", tmp_fname);
+#endif
         return false;
     } else {
+#ifdef USE_PRINTS
         printf("read_creature_data %s success, %d\n", tmp_fname, retry);
+#endif
     }
 
 	// Parse the data file. the name is first and ends in a newline (0x0A)
@@ -115,7 +126,9 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
 	}
 
 	if (cctr >= CAPTURE_MAX_NAME_LEN) {
+#ifdef USE_PRINTS
         printf("excessive name length in %s\n", tmp_fname);
+#endif
 		return false;
 	} else {
         *pdst = 0; // null terminate the name string
@@ -158,7 +171,9 @@ static void __capture_timer_handler(void * p_data) {
                 notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
             } else {
                 // we can't display this notification
+#ifdef USE_PRINTS
                 printf("Not notifying %d\n", notifications_state.creature_index);
+#endif
                 notifications_state.state = NOTIFICATIONS_STATE_IDLE;
             }
         }
@@ -298,7 +313,9 @@ uint16_t __choose_creature(void) {
                     creature_id = 0;
                 }
             } else {
+#ifdef USE_PRINTS
                 printf("bad percentage in for creature ID %d\n", creature_data.percent);
+#endif
                 creature_id = 0;
             }
         } else {
