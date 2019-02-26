@@ -33,9 +33,11 @@
 typedef struct {
 	void        (*p_notification_callback)(void);
 	uint32_t    timeout; // in seconds
+#if INCLUDE_CAPTURE
 	char        creature_name[CAPTURE_MAX_NAME_LEN + 1];
 	uint8_t     creature_percent;
 	uint16_t    creature_index;
+#endif
 	uint8_t	    state;
 	uint8_t     button_value;
 	char        led_filename[20]; // 8.3 plus a terminator plus any possible path
