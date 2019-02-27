@@ -82,6 +82,30 @@ extern void mbp_bling_portal_wink();
 extern void mbp_bling_portals();
 extern void mbp_bling_sleestaks();
 extern void mbp_bling_tardis_nyan();
+
+extern void mbp_bling_cat_pizza_dj();
+extern void mbp_bling_cat_pizza_taco();
+extern void mbp_bling_fallout_shelter();
+extern void mbp_bling_futerama_ohsnap();
+extern void mbp_bling_incinerate();
+extern void mbp_bling_kraken();
+extern void mbp_bling_lozlink();
+extern void mbp_bling_mars_kitty();
+extern void mbp_bling_marching_robots();
+extern void mbp_bling_old_bender();
+extern void mbp_bling_oppy();
+extern void mbp_bling_portal_hug();
+extern void mbp_bling_psych_kitteh();
+extern void mbp_bling_rick_morty_amp();
+extern void mbp_bling_rick_morty_g_force();
+extern void mbp_bling_sophia();
+extern void mbp_bling_taco_nyan();
+extern void mbp_bling_taco_robot();
+extern void mbp_bling_unicorn_cat();
+extern void mbp_bling_drwho_fez();
+extern void mbp_bling_drwho_whoops();
+extern void mbp_bling_zombia_unicorn();
+
 extern void mbp_bling_twilight_zone();
 extern void mbp_bling_zombie_nyan();
 

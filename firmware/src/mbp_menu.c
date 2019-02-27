@@ -504,8 +504,32 @@ static void mbp_menu_bling() {
 #if INCLUDE_CAPTURE
 	items[menu.count++] = (menu_item_t ) { "Capture", "MENU/BLING.ICO", NULL, &mbp_bling_captured, NULL };
 #endif
+//begin 22 new
+	items[menu.count++] = (menu_item_t ) { "CatDJ", "MENU/CATPDJ.ICO", "MENU/CATPDJ.PRV", &mbp_bling_cat_pizza_dj, NULL };
+	items[menu.count++] = (menu_item_t ) { "CatTaco", "MENU/CATPTACO.ICO", "MENU/CATPTACO.PRV", &mbp_bling_cat_pizza_taco, NULL };
+	items[menu.count++] = (menu_item_t ) { "FOShelt", "MENU/FOSHELTR.ICO", "MENU/FOSHELTR.PRV", &mbp_bling_fallout_shelter, NULL };
+	items[menu.count++] = (menu_item_t ) { "OhSnap", "MENU/FUTSNAP.ICO", "MENU/FUTSNAP.PRV", &mbp_bling_futerama_ohsnap, NULL };
+	items[menu.count++] = (menu_item_t ) { "Inciner8", "MENU/INCNER8.ICO", "MENU/INCINER8.PRV", &mbp_bling_incinerate, NULL };
+	items[menu.count++] = (menu_item_t ) { "Kraken", "MENU/KRAKEN.ICO", "MENU/KRAKEN.PRV", &mbp_bling_kraken, NULL };
+	items[menu.count++] = (menu_item_t ) { "LozLink", "MENU/LOZLINK.ICO", "MENU/LOZLINK.PRV", &mbp_bling_lozlink, NULL };
+	items[menu.count++] = (menu_item_t ) { "MarsKty", "MENU/MARSKTY.ICO", "MENU/MARSKTY.PRV", &mbp_bling_mars_kitty, NULL };
+	items[menu.count++] = (menu_item_t ) { "MrchRob", "MENU/MRCHROBT.ICO", "MENU/MRCHROBT.PRV", &mbp_bling_marching_robots, NULL };
+	items[menu.count++] = (menu_item_t ) { "OldBndr", "MENU/OLDBNDR.ICO", "MENU/OLDBNDR.PRV", &mbp_bling_old_bender, NULL };
+	items[menu.count++] = (menu_item_t ) { "Oppy", "MENU/OPPY.ICO", "MENU/OPPY.PRV", &mbp_bling_oppy, NULL };
+	items[menu.count++] = (menu_item_t ) { "PrtlHug", "MENU/PRTLHUG.ICO", "MENU/PRTLHUG.PRV", &mbp_bling_portal_hug, NULL };
+	items[menu.count++] = (menu_item_t ) { "PsyKtty", "MENU/PSYKTTY.ICO", "MENU/PSYCKTTY.PRV", &mbp_bling_psych_kitteh, NULL };
+	items[menu.count++] = (menu_item_t ) { "RMAmp", "MENU/RMAMP.ICO", "MENU/RMAMP.PRV", &mbp_bling_rick_morty_amp, NULL };
+	items[menu.count++] = (menu_item_t ) { "RMGfrce", "MENU/RMGFORC.ICO", "MENU/RMGFORC.PRV", &mbp_bling_rick_morty_g_force, NULL };
+	items[menu.count++] = (menu_item_t ) { "Sophia", "MENU/SOPHIA.ICO", "MENU/SOPHIA.PRV", &mbp_bling_sophia, NULL };
+	items[menu.count++] = (menu_item_t ) { "TacoNy", "MENU/TACONYAN.ICO", "MENU/TACONYAN.PRV", &mbp_bling_taco_nyan, NULL };
+	items[menu.count++] = (menu_item_t ) { "TacoRbt", "MENU/TACOROBT.ICO", "MENU/TACOROBT.PRV", &mbp_bling_taco_robot, NULL };
+	items[menu.count++] = (menu_item_t ) { "UniCat", "MENU/UNICAT.ICO", "MENU/UNICAT.PRV", &mbp_bling_unicorn_cat, NULL };
+	items[menu.count++] = (menu_item_t ) { "WhoFez", "MENU/WHOFEZ.ICO", "MENU/WHOFEZ.PRV", &mbp_bling_drwho_fez, NULL };
+	items[menu.count++] = (menu_item_t ) { "Whoops", "MENU/WHOWHOOP.ICO", "MENU/WHOWHOOP.PRV", &mbp_bling_drwho_whoops, NULL };
+	items[menu.count++] = (menu_item_t ) { "ZombUni", "MENU/ZOMBUNI.ICO", "MENU/ZOMBUNI.PRV", &mbp_bling_zombia_unicorn, NULL };
 
-	items[menu.count++] = (menu_item_t ) { "Skull", "MENU/SKLCROSgithubS.ICO", "MENU/SKLCROSS.PRV", &mbp_bling_skull_crossbones, NULL };
+// end new
+	items[menu.count++] = (menu_item_t ) { "Skull", "MENU/SKLCROSS.ICO", "MENU/SKLCROSS.PRV", &mbp_bling_skull_crossbones, NULL };
 	items[menu.count++] = (menu_item_t ) { "Flames", "MENU/FLAMES.ICO", "MENU/FLAMES.PRV", &mbp_bling_flames, NULL };
 	items[menu.count++] = (menu_item_t ) { "Twitter", "MENU/TWITTER.ICO", "MENU/TWITTER.PRV", &mbp_bling_twitter, NULL };
 	//Add whats up bling (heman)

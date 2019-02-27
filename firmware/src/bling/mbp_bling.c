@@ -469,40 +469,48 @@ void mbp_bling_skull_crossbones() {
 }
 
 void mbp_bling_5th_element_dance(void *data) { simple_filebased_bling("BLING/JOCO/5THEL.RAW", "BLING/FADEBLUE.RGB"); }
-
 void mbp_bling_candy_mountain(void *data) { simple_filebased_bling("BLING/JOCO/CANDYMTN.RAW", "BLING/BLUPRPSW.RGB"); }
-
 void mbp_bling_concert_flame(void *data) { simple_filebased_bling("BLING/JOCO/CFLAME.RAW", "BLING/FLAMES.RGB"); }
-
 void mbp_bling_dancing_cyberman(void *data) { simple_filebased_bling("BLING/JOCO/CYBERMAN.RAW", "BLING/FADEGRN.RGB"); }
-
 void mbp_bling_drwho_time(void *data) { simple_filebased_bling("BLING/JOCO/DRWHOTIM.RAW", "BLING/TUNNEL.RGB");}
-
 void mbp_bling_duckhunt(void *data) { simple_filebased_bling("BLING/JOCO/DUCKHUNT.RAW", "BLING/COLORS3.RGB"); }
-
 void mbp_bling_fallout_boygirl_drinking(void *data) { simple_filebased_bling("BLING/JOCO/FODRINK.RAW", "BLING/BOUNCE.RGB"); }
-
 void mbp_bling_fallout_boy_science(void *data) { simple_filebased_bling("BLING/JOCO/FOSCI.RAW", "BLING/TUNNEL.RGB"); }
-
 void mbp_bling_get_on_my_horse(void *data) { simple_filebased_bling("BLING/JOCO/MYHORSE.RAW", "BLING/IRADESC.RGB"); }
-
 void mbp_bling_multipass_leelo(void *data) { simple_filebased_bling("BLING/JOCO/MLTIPASS.RAW", "BLING/REDORNG.RGB"); }
-
 void mbp_bling_outer_limits() {
     uint8_t hue = 0;
     util_led_clear();
     util_gfx_draw_raw_file("BLING/JOCO/OUTERLIM.RAW", 0, 0, 128, 128, &__mbp_bling_glitter_callback, true, &hue, 0);
 }
-
 void mbp_bling_portal_frying_pan(void *data) { simple_filebased_bling("BLING/JOCO/PORTALFP.RAW", "BLING/FADEYLLW.RGB"); }
-
 void mbp_bling_portal_wink(void *data) { simple_filebased_bling("BLING/JOCO/PORTALWN.RAW", "BLING/CIRCLES.RGB"); }
-
 void mbp_bling_portals(void *data) { simple_filebased_bling("BLING/JOCO/PORTALS.RAW", "BLING/TETRIS.RGB"); }
-
 void mbp_bling_sleestaks(void *data) { simple_filebased_bling("BLING/JOCO/SLEESTAK.RAW", "BLING/GRNYELL.RGB"); }
-
 void mbp_bling_tardis_nyan(void *data) { simple_filebased_bling("BLING/JOCO/TARDNYAN.RAW", "BLING/BOUNCE.RGB"); }
+
+void mbp_bling_cat_pizza_dj(void *data) { simple_filebased_bling("BLING/JOCO/CATPDJ.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_cat_pizza_taco(void *data) { simple_filebased_bling("BLING/JOCO/CATPTACO.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_fallout_shelter(void *data) { simple_filebased_bling("BLING/JOCO/FOSHELTR.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_futerama_ohsnap(void *data) { simple_filebased_bling("BLING/JOCO/FUTSNAP.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_incinerate(void *data) { simple_filebased_bling("BLING/JOCO/INCINER8.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_kraken(void *data) { simple_filebased_bling("BLING/JOCO/KRAKEN.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_lozlink(void *data) { simple_filebased_bling("BLING/JOCO/LOZLINK.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_mars_kitty(void *data) { simple_filebased_bling("BLING/JOCO/MARSKTY.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_marching_robots(void *data) { simple_filebased_bling("BLING/JOCO/MRCHROBT.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_old_bender(void *data) { simple_filebased_bling("BLING/JOCO/OLDBNDR.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_oppy(void *data) { simple_filebased_bling("BLING/JOCO/OPPY.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_portal_hug(void *data) { simple_filebased_bling("BLING/JOCO/PRTLHUG.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_psych_kitteh(void *data) { simple_filebased_bling("BLING/JOCO/PSYCKTTY.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_rick_morty_amp(void *data) { simple_filebased_bling("BLING/JOCO/RMAMP.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_rick_morty_g_force(void *data) { simple_filebased_bling("BLING/JOCO/RMGFORC.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_sophia(void *data) { simple_filebased_bling("BLING/JOCO/SOPHIA.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_taco_nyan(void *data) { simple_filebased_bling("BLING/JOCO/TACONYAN.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_taco_robot(void *data) { simple_filebased_bling("BLING/JOCO/TACOROBT.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_unicorn_cat(void *data) { simple_filebased_bling("BLING/JOCO/UNICAT.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_drwho_fez(void *data) { simple_filebased_bling("BLING/JOCO/WHOFEZ.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_drwho_whoops(void *data) { simple_filebased_bling("BLING/JOCO/WHOWHOOP.RAW", "BLING/BOUNCE.RGB"); }
+void mbp_bling_zombia_unicorn(void *data) { simple_filebased_bling("BLING/JOCO/ZOMBUNI.RAW", "BLING/BOUNCE.RGB"); }
 
 void mbp_bling_twilight_zone() {
     uint8_t hue = 0;
