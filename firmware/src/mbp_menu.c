@@ -91,13 +91,11 @@ uint8_t mbp_menu(menu_t *p_menu) {
 
     while (1) {
         status = __mbp_menu_inner(p_menu);
-        if ((p_menu->allow_notifications) && (status == MENU_NOTIFICATION)) {
-            // call the notification call back and then just continue, so we reload the same menu again
-			notifications_state.p_notification_callback();
+        if (status == MENU_SPECIAL) {
+            capture_do_something_special(p_menu->allow_notifications);
         } else {
             return status;
         }
-
     }
 
     // restore current background LED state and return
@@ -194,7 +192,7 @@ uint8_t __mbp_menu_inner(menu_t *p_menu) {
         if (p_menu->allow_notifications) {
             button = util_button_notification_wait();
             if (button == BUTTON_MASK_SPECIAL) {
-                return MENU_NOTIFICATION;
+                return MENU_SPECIAL;
             }
         } else {
             // we're not looking for notifications

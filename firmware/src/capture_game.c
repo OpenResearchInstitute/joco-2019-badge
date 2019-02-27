@@ -23,13 +23,6 @@
 
 //#define USE_PRINTS
 
-typedef struct {
-    bool        initialized;
-    bool        sending;
-    uint16_t    max_index;
-    uint16_t    c_index;
-    uint16_t    countdown;
-} capture_state_t;
 capture_state_t capture_state;
 
 char tmp_fname[20];
@@ -68,8 +61,6 @@ uint16_t rarity_to_points(uint8_t percent) {
 bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     char file_data[CAPTURE_MAX_DATA_FILE_LEN+1];
     UINT bytes_read;
-    uint16_t retry;
-    bool done;
     FRESULT result;
     FIL dat_file;
 
@@ -82,67 +73,57 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     // So, copy the recover code from util_gfx.c
     sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
 
-    retry = 4;
-    done = false;
-    while ((!done) &&(retry-- > 0)) {
-        result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
-        if (result == FR_OK) {
-            result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
-            if (result == FR_OK) {
+    result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
+    if (result != FR_OK) {
 #ifdef USE_PRINTS
-                printf("read %d bytes of %s\n", bytes_read, tmp_fname);
+        printf("failed to open data file %d\n", id);
 #endif
-                done = true;
-            }
-        }
-        if (!done) {
-            nrf_delay_ms(500);
-        }
+        return false;
     }
 
+    result = f_read(&dat_file, (uint8_t *) file_data, CAPTURE_MAX_DATA_FILE_LEN, &bytes_read);
     f_close(&dat_file);
-
-    if (!done) {
+    if (result != FR_OK) {
 #ifdef USE_PRINTS
-        printf("read_creature_data %s failed\n", tmp_fname);
+        printf("failed to read data file %d\n", id);
 #endif
         return false;
     } else {
 #ifdef USE_PRINTS
-        printf("read_creature_data %s success, %d\n", tmp_fname, retry);
+        printf("read %d bytes of %s\n", bytes_read, tmp_fname);
 #endif
-    }
+        // Parse the data file. the name is first and ends in a newline (0x0A)
+        file_data[bytes_read] = 0;
+        uint16_t cctr = 0;
+        char *pch = &file_data[0];
+        char *pdst = &creature_data->name[0];
 
-    // Parse the data file. the name is first and ends in a newline (0x0A)
-    file_data[bytes_read] = 0;
-    uint16_t cctr = 0;
-    char *pch = &file_data[0];
-    char *pdst = &creature_data->name[0];
-
-    while ((*pch != 0x0A) && (cctr < CAPTURE_MAX_NAME_LEN)) {
-        // we should probably test for nonprintables here
-        *pdst++ = *pch++;
-        cctr++;
-    }
-
-    if (cctr >= CAPTURE_MAX_NAME_LEN) {
-#ifdef USE_PRINTS
-        printf("excessive name length in %s\n", tmp_fname);
-#endif
-        return false;
-    } else {
-        *pdst = 0; // null terminate the name string
-        pch++;
-        uint32_t tpct = strtol(pch, NULL, 10);
-        if (tpct > 100) {
-            tpct = 100;
+        while ((*pch != 0x0A) && (cctr < CAPTURE_MAX_NAME_LEN)) {
+            // we should probably test for nonprintables here
+            *pdst++ = *pch++;
+            cctr++;
         }
-        creature_data->percent = (uint8_t) tpct;
-        return true;
+
+        if (cctr >= CAPTURE_MAX_NAME_LEN) {
+#ifdef USE_PRINTS
+            printf("excessive name length in %s\n", tmp_fname);
+#endif
+            return false;
+        } else {
+            *pdst = 0; // null terminate the name string
+            pch++;
+            uint32_t tpct = strtol(pch, NULL, 10);
+            if (tpct > 100) {
+                tpct = 100;
+            }
+            creature_data->percent = (uint8_t) tpct;
+            return true;
+        }
     }
 }
 
 static void __capture_timer_handler(void * p_data) {
+    // This should fire once per second.
     char name[SETTING_NAME_LENGTH];
 
     if (dupe_cooldown > 0) {
@@ -151,101 +132,49 @@ static void __capture_timer_handler(void * p_data) {
         dupe_cooldown = CAPTURE_DUPE_COOLDOWN; // just in case we have a decrement race
     }
 
-    // This should fire once per second.
     if (capture_state.initialized) {
-        if (notifications_state.state == NOTIFICATIONS_STATE_INITIATED) {
-            /*
-             * We handle this step in the timer handler here because it requires reading the
-             * creature data with a call to read_creature_data(). The only other place that creature data is
-             * also in this timer handler. This is because the fatfs code is not re-entrant for operations on
-             * the same file, and it has proven to be true that we can receive a creature advertisement for
-             * a creature ID and also be in th eprocess of picking that one to randomly send. Having both
-             * calls to read_creature_data() in this handler avoids a re-entrancy problem.
-             */
-            creature_data_t creature_data;
-            // creature index is already populated in notification state, fill in the name and percentage
-            bool ok = read_creature_data(notifications_state.creature_index, &creature_data);
-            if (ok) {
-                notifications_state.creature_percent = creature_data.percent;
-                strncpy(notifications_state.creature_name, creature_data.name, CAPTURE_MAX_NAME_LEN + 1);
-                notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
-            } else {
-                // we can't display this notification
-#ifdef USE_PRINTS
-                printf("Not notifying %d\n", notifications_state.creature_index);
-#endif
-                notifications_state.state = NOTIFICATIONS_STATE_IDLE;
+        // check the state of  creature sending
+        switch (capture_state.sending_state) {
+        case CAPTURE_SENDING_STATE_IDLE:
+            if (--capture_state.countdown == 0) {
+                capture_state.sending_state = CAPTURE_SENDING_STATE_PENDING_START;
             }
-        }
+            break;
+        case CAPTURE_SENDING_STATE_PENDING_START:
+            break;
+        case CAPTURE_SENDING_STATE_SENDING:
+            // we started it somewhere else, set the timer to tell when to stop
+            if (--capture_state.countdown == 0) {
 
-        if (--capture_state.countdown == 0) {
-            // If it's time to send a random creature, do that
-            if (!capture_state.sending) {
-                if (notifications_state.state == NOTIFICATIONS_STATE_IDLE) {
-                    // Set up to send some advertising packets identifying as a creature, instead of our normal info
-                    // Select a creature ID to send
-                    capture_state.c_index = __choose_creature();
-                    if (capture_state.c_index == 0) {
-                        // Set countdown to start next sending time
-                        capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
-                        capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
-                    } else {
-
-                        // Encode it into the name field
-                        __encode_name(capture_state.c_index, name);
-
-                        // Disable advertising
-                        util_ble_off();
-
-                        // Change the Appearance ID to make this a 'creature' advertisement
-                        util_ble_appearance_set(APPEARANCE_ID_CREATURE);
-
-                        // The field is seven characters long, and has leading and trailing nulls
-                        util_ble_name_set_special(name, 7);
-
-                        // Enable advertising
-                        capture_state.sending = true;
-                        util_ble_on();
-
-                        // Make it available to our own badge
-                        capture_internal_broadcast = capture_state.c_index;
-
-                        // Set countdown so we stop sending
-                        capture_state.countdown = CAPTURE_SENDING_LENGTH;
-                    }
-                } else {
-                    // were in a notification, just defer the creature send
-                    capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
-                    capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
-                }
-            } else {
-                // we were sending, so stop
-                // Disable advertising
+                // Stop Sending
                 util_ble_off();
-
-                // Restore the name in the advertisement from the state information
                 mbp_state_name_get(name);
-                util_ble_name_set(name);
-
-                // restore the appearance ID to BADGE_APPEARANCE
-                util_ble_appearance_set(BADGE_APPEARANCE);
-
-                // Enable advertising
-                capture_state.sending = false;
+                util_ble_name_set(name); // Restore the name
+                util_ble_appearance_set(BADGE_APPEARANCE); // restore the appearance ID
                 util_ble_on();
 
                 // Set countdown to start next sending time
                 capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
                 capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+                capture_state.sending_state = CAPTURE_SENDING_STATE_IDLE;
             }
+            break;
+        case CAPTURE_SENDING_STATE_SKIP:
+            // Set countdown to start next sending time
+            capture_state.countdown = CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2);
+            capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
+            capture_state.sending_state = CAPTURE_SENDING_STATE_IDLE;
+            break;
+        default:
+            mbp_ui_error("Bad State in creature timer");
+            break;
         }
     }
-//  app_sched_execute();
 }
 
 void capture_init(void) {
     capture_state.initialized = false;
-    capture_state.sending = false;
+    capture_state.sending_state = CAPTURE_SENDING_STATE_IDLE;
     capture_state.countdown = util_math_rand16_max(CAPTURE_SENDING_INTERVAL-(CAPTURE_SENDING_INTERVAL_JITTER/2));
     capture_state.countdown += util_math_rand16_max(CAPTURE_SENDING_INTERVAL_JITTER);
 
@@ -286,16 +215,12 @@ uint16_t capture_max_index() {
 }
 
 
-bool capture_is_sending() {
-    return capture_state.sending;
-}
-
 uint16_t __choose_creature(void) {
 #ifdef DEBUG_USE_SEQUENTIAL_CREATURES
     static uint16_t seq_id = 1;
 #endif
 
-    uint8_t ttl = 20;
+    uint8_t ttl = 10;
     uint16_t creature_id = 0; // 0 is invalid
     creature_data_t creature_data;
     while ((creature_id == 0) && (--ttl > 0)) {
@@ -321,7 +246,7 @@ uint16_t __choose_creature(void) {
                 }
             } else {
 #ifdef USE_PRINTS
-                printf("bad percentage in for creature ID %d\n", creature_data.percent);
+                printf("bad percentage for creature ID %d\n", creature_data.percent);
 #endif
                 creature_id = 0;
             }
@@ -359,7 +284,7 @@ void capture_process_heard_index(uint16_t creature_id) {
 
         notifications_state.creature_index = creature_id;
         dupe_cooldown = CAPTURE_DUPE_COOLDOWN;
-        notifications_state.state = NOTIFICATIONS_STATE_INITIATED;
+        notifications_state.state = NOTIFICATIONS_STATE_REQUESTED;
     }
 }
 
@@ -441,4 +366,48 @@ void mbp_bling_captured(void *data) {
         }
     }
 }
+
+void capture_do_something_special(bool allow_notifications) {
+    // Called only from main threads,  not ISRs/Timers
+    char name[SETTING_NAME_LENGTH];
+
+    if (allow_notifications && (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED)) {
+        notifications_state.p_notification_callback();
+    }
+
+    if (capture_state.sending_state == CAPTURE_SENDING_STATE_PENDING_START) {
+        // Set up to send some advertising packets identifying as a creature, instead of our normal info
+        // Select a creature ID to send
+        capture_state.c_index = __choose_creature();
+        if (capture_state.c_index == 0) {
+            capture_state.sending_state = CAPTURE_SENDING_STATE_SKIP;
+        } else {
+
+            // Encode it into the name field
+            __encode_name(capture_state.c_index, name);
+
+            // Disable advertising
+            util_ble_off();
+
+            // Change the Appearance ID to make this a 'creature' advertisement
+            util_ble_appearance_set(APPEARANCE_ID_CREATURE);
+
+            // The field is seven characters long, and has leading and trailing nulls
+            util_ble_name_set_special(name, 7);
+
+            // Enable advertising
+            util_ble_on();
+
+            capture_state.countdown = CAPTURE_SENDING_LENGTH;
+            capture_state.sending_state = CAPTURE_SENDING_STATE_SENDING;
+
+            // Make it available to our own badge
+            capture_internal_broadcast = capture_state.c_index;
+        }
+    }
+
+
+}
+
+
 #endif //INCLUDE_CAPTURE

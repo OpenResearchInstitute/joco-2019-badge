@@ -167,7 +167,7 @@
 #include "ntopt.h"
 #include "partcl/tcl.h"
 #include "skifree.h"
-#include "SEGGER_RTT.h"
+//#include "SEGGER_RTT.h"
 #if INCLUDE_QSO
 #include "transio_log.h"
 #include "transio_qso.h"

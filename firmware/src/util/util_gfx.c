@@ -580,7 +580,7 @@ uint8_t __util_gfx_draw_raw_file_inner(char *filename, int16_t x, int16_t y, uin
             }
 
 			// Check to see if a notification needs to be displayed, but only if we're looping 
-			if (loop && (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED)) {
+			if (loop && ((notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) || (capture_state.sending_state == CAPTURE_SENDING_STATE_PENDING_START))) {
 				loop = false;
 				button = BUTTON_MASK_SPECIAL;
 				break;
@@ -618,11 +618,7 @@ uint8_t util_gfx_draw_raw_file(char *filename, int16_t x, int16_t y, uint16_t w,
 	do {
 		rstat = __util_gfx_draw_raw_file_inner(filename, x, y, w, h, p_frame_callback, loop, data, time);
 		if (rstat == BUTTON_MASK_SPECIAL) {
-			// Inside the bling look, it was detected that there's a notification pending
-			// TODO Validate that callback pointer
-			// Call the notification callback.
-			notifications_state.p_notification_callback();
-			// Done with the notification callback, just fall through and re-call the custom bling
+            capture_do_something_special(true);
 		} else {
 			// The user terminated the bling, so we just return that button value
 			done = true;

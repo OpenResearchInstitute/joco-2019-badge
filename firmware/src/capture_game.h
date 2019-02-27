@@ -21,6 +21,22 @@
 #define CAPTURE_GAME_H_
 #if INCLUDE_CAPTURE
 
+typedef struct {
+    bool        initialized;
+    //bool        sending;
+    uint16_t    sending_state;
+    uint16_t    max_index;
+    uint16_t    c_index;
+    uint16_t    countdown;
+} capture_state_t;
+
+#define CAPTURE_SENDING_STATE_IDLE 0
+#define CAPTURE_SENDING_STATE_PENDING_START 1
+#define CAPTURE_SENDING_STATE_SENDING 2
+#define CAPTURE_SENDING_STATE_SKIP 3
+
+extern capture_state_t capture_state;
+
 extern uint16_t capture_internal_broadcast;
 
 // Testing
@@ -79,10 +95,10 @@ extern uint16_t rarity_to_points(uint8_t);
 extern bool read_creature_data(uint16_t, creature_data_t *);
 extern void capture_init(void);
 extern uint16_t capture_max_index(void);
-extern bool capture_is_sending(void);
 extern void capture_process_heard_index(uint16_t);
 extern void capture_process_heard(char *name);
 extern void mbp_bling_captured(void *data);
+extern void capture_do_something_special(bool allow_notifications);
 
 
 #endif /* CAPTURE_GAME_H_ */

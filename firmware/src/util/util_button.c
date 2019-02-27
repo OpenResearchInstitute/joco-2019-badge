@@ -150,7 +150,7 @@ uint8_t util_button_notification_wait() {
 		err_code = sd_app_evt_wait();
 		APP_ERROR_CHECK(err_code);
 
-        if (notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) {
+        if ((notifications_state.state == NOTIFICATIONS_STATE_REQUESTED) || (capture_state.sending_state == CAPTURE_SENDING_STATE_PENDING_START)) {
 				button = BUTTON_MASK_SPECIAL;
         } else if (util_button_state() != 0){
             button = util_button_state();

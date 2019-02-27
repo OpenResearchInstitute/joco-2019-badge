@@ -31,6 +31,7 @@ void notifications_init() {
 #if INCLUDE_CAPTURE
 void capture_notification_callback() {
     // This should only be called when it is OK to display a notification.
+    creature_data_t creature_data;
 
     //buffer for formatting text
     char temp[20];
@@ -47,7 +48,7 @@ void capture_notification_callback() {
 
     // Validate that the creature index is in range
     if (notifications_state.creature_index > capture_max_index()) {
-        notifications_state.button_value = BUTTON_MASK_SPECIAL;;
+        notifications_state.button_value = BUTTON_MASK_LEFT; // so we don't try to score it
         notifications_state.state = NOTIFICATIONS_STATE_IDLE;
         return;
     }
@@ -67,6 +68,21 @@ void capture_notification_callback() {
     background_was_running = mbp_background_led_running();
 
     mbp_background_led_stop();
+
+    // creature index is already populated in notification state, fill in the name and percentage
+    bool ok = read_creature_data(notifications_state.creature_index, &creature_data);
+    if (ok) {
+        notifications_state.creature_percent = creature_data.percent;
+        strncpy(notifications_state.creature_name, creature_data.name, CAPTURE_MAX_NAME_LEN + 1);
+    } else {
+        // we can't display this notification
+        notifications_state.button_value = BUTTON_MASK_LEFT; // so we don't try to score it
+        notifications_state.state = NOTIFICATIONS_STATE_IDLE;
+        if (background_was_running) {
+            mbp_background_led_start();
+        }
+        return;
+    }
 
     //Print the name
     util_gfx_set_font(FONT_LARGE);

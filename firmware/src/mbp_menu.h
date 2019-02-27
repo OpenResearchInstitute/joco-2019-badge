@@ -34,7 +34,7 @@
 
 #define MENU_OK		0
 #define MENU_QUIT	1
-#define MENU_NOTIFICATION 2
+#define MENU_SPECIAL 2
 
 #define MENU_DRAW_EVERYTHING	0
 #define MENU_DRAW_UPDATES		1
