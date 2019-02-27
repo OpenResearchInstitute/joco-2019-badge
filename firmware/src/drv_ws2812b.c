@@ -73,9 +73,11 @@ void ws2812b_send(uint8_t *leds) {
 	int16_t buffer_size = (LED_COUNT * 4 * 3);	//2 bytes per bit, reset latch is 6 bytes
 	uint8_t buffer[buffer_size];
 	uint8_t rx;
+    bool night;
 
-	if (mbp_state_night_mode_get()) {
-	        brightness = NIGHT_BRIGHTNESS;
+    night = mbp_state_night_mode_get();
+	if (night) {
+        brightness = NIGHT_BRIGHTNESS;
 	} else {
 		brightness = NORMAL_BRIGHTNESS;
 	}
@@ -85,11 +87,25 @@ void ws2812b_send(uint8_t *leds) {
 
 	uint16_t buffer_index = 0;
 	uint32_t color_index = 0;
-	uint8_t red, green, blue;
+	uint8_t r1, g1, b1, red, green, blue;
 	for (uint32_t i = 0; i < LED_COUNT; i++) {
-		blue = util_math_map(leds[color_index++], 0, 255, 0, brightness);
-		green = util_math_map(leds[color_index++], 0, 255, 0, brightness);
-		red = util_math_map(leds[color_index++], 0, 255, 0, brightness);
+        b1 = leds[color_index++];
+        g1 = leds[color_index++];
+        r1 = leds[color_index++];
+		blue = util_math_map(b1, 0, 255, 0, brightness);
+		green = util_math_map(g1, 0, 255, 0, brightness);
+		red = util_math_map(r1, 0, 255, 0, brightness);
+        if (night) {
+            if ((r1 > 0) && (red == 0)) {
+                red = 1;
+            }
+            if ((g1 > 0) && (green == 0)) {
+                green = 1;
+            }
+            if ((b1 > 0) && (blue == 0)) {
+                blue = 1;
+            }
+        }
 
 		//GREEN
 		for (uint8_t j = 0; j < 8; j++) {

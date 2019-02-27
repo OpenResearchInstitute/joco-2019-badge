@@ -68,9 +68,6 @@ bool read_creature_data(uint16_t id, creature_data_t *creature_data) {
     printf("reading %d\n", id);
 #endif
 
-    // read the data file for that creature
-    // This seemed to fail often and end in a bad file system state
-    // So, copy the recover code from util_gfx.c
     sprintf(tmp_fname, "CAPTURE/%04d.DAT", id);
 
     result = f_open(&dat_file, tmp_fname, FA_READ | FA_OPEN_EXISTING);
