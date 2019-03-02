@@ -303,7 +303,9 @@ void mbp_bling_captured(void *data) {
 
     uint8_t button;
     bool background_was_running;
+    bool done;
     creature_data_t creature_data;
+    uint16_t i;
 
     if (mbp_state_capture_count_get() == 0) {
         util_gfx_cursor_area_reset();
@@ -316,8 +318,17 @@ void mbp_bling_captured(void *data) {
         return;
     }
 
-    for (uint16_t i = 1; i <= capture_state.max_index; i++) {
+    background_was_running = mbp_background_led_running();
+    mbp_background_led_stop();
+
+    done = false;
+    i = 1;
+    while(!done) {
+#if defined DEBUG_DISPLAY_ALL_IN_BLING
+        if (true) {
+#else
         if (mbp_state_captured_is_captured(i)) {
+#endif
             if (!read_creature_data(i, &creature_data)) {
                 continue;
             }
@@ -325,8 +336,6 @@ void mbp_bling_captured(void *data) {
             util_gfx_cursor_area_reset();
             mbp_ui_cls();
 
-            background_was_running = mbp_background_led_running();
-            mbp_background_led_stop();
             
             util_gfx_set_font(FONT_LARGE);
             util_gfx_set_color(COLOR_WHITE);
@@ -334,7 +343,7 @@ void mbp_bling_captured(void *data) {
             util_gfx_print(creature_data.name);
 
             //Print points
-            util_gfx_set_color(COLOR_RED);
+            //util_gfx_set_color(COLOR_RED);
             sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
             util_gfx_set_cursor(0, 117);
             util_gfx_print(temp);
@@ -348,19 +357,22 @@ void mbp_bling_captured(void *data) {
             case BUTTON_MASK_DOWN:
             case BUTTON_MASK_LEFT:
             case BUTTON_MASK_RIGHT:
+                done = true; // stop displaying the bling
             case BUTTON_MASK_ACTION:
-                // user pressed a button
-                break; // stop displaying the bling
+                break; // skip to the next creature
             default:
-                continue; // it was a timeout
-                break;
+                break; // it was a timeout
             }
         }
-
-        //Only start background LED display if previously running
-        if (background_was_running) {
-            mbp_background_led_start();
+        
+        if (++i > capture_state.max_index) {
+            i = 1;
         }
+    }
+
+    //Only start background LED display if previously running
+    if (background_was_running) {
+        mbp_background_led_start();
     }
 }
 
