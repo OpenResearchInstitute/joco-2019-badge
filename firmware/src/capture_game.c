@@ -303,6 +303,7 @@ void mbp_bling_captured(void *data) {
 
     uint8_t button;
     bool background_was_running;
+    bool done;
     creature_data_t creature_data;
 
     if (mbp_state_capture_count_get() == 0) {
@@ -319,7 +320,7 @@ void mbp_bling_captured(void *data) {
     background_was_running = mbp_background_led_running();
     mbp_background_led_stop();
 
-    for (uint16_t i = 1; i <= capture_state.max_index; i++) {
+    for (uint16_t i = 1; ((i <= capture_state.max_index) && (!done)); i++) {
         if ((DEBUG_DISPLAY_ALL_IN_BLING) || mbp_state_captured_is_captured(i)) {
             if (!read_creature_data(i, &creature_data)) {
                 continue;
@@ -348,11 +349,10 @@ void mbp_bling_captured(void *data) {
             case BUTTON_MASK_DOWN:
             case BUTTON_MASK_LEFT:
             case BUTTON_MASK_RIGHT:
-            case BUTTON_MASK_ACTION:
-                // user pressed a button
+                done = true;
                 break; // stop displaying the bling
+            case BUTTON_MASK_ACTION:
             default:
-                continue; // it was a timeout
                 break;
             }
         }

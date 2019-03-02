@@ -361,10 +361,13 @@ void simple_filebased_bling(char *rawfile, char *rgbfile) {
 }
 
 uint8_t notification_filebased_bling(char *rawfile, char *rgbfile, uint32_t time) {
+    uint8_t retval;
     util_led_clear();
     UTIL_LED_ANIM_INIT(anim);
     util_led_load_rgb_file(rgbfile, &anim);
-    return (util_gfx_draw_raw_file(rawfile, 0, 10, 128, 104, &__rgb_file_callback, true, (void *) &anim, time));
+    retval = util_gfx_draw_raw_file(rawfile, 0, 10, 128, 104, &__rgb_file_callback, true, (void *) &anim, time);
+    util_led_clear();
+    return (retval);
 }
 
 void mbp_bling_backer_abraxas3d(void *data) {
