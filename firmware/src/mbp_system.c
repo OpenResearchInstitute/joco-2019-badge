@@ -83,31 +83,37 @@ void mbp_system_code() {
 	memset(code, 0, 9);
 	mbp_ui_input("Code", "Enter Code:", code, 8, INPUT_FORMAT_SCROLL);
 
-	//Master mode
-	if (strcmp(code, "UP2RIGHT") == 0) {
-		mbp_state_master_set(true);
+	//Oppy
+	else if (strcmp(code, "MER-B") == 0) {
 		uint16_t unlock = mbp_state_unlock_get();
-		mbp_state_unlock_set(unlock | UNLOCK_MASK_MASTER_1 | UNLOCK_MASK_MASTER_2 | UNLOCK_MASK_MASTER_3 | UNLOCK_MASK_MASTER_4);
+		mbp_state_unlock_set(unlock | UNLOCK_MASK_OPPY);
 		mbp_state_save();
-		mbp_ui_popup("Master", "Master Mode Engaged.");
+		mbp_ui_popup("Unlocked", "Oppy mode enabled.");
 	}
-	//Wheaton
-	else if (strcmp(code, "TABLETOP") == 0) {
+	//He Man
+	else if (strcmp(code, "CRINGER") == 0) {
 		uint16_t unlock = mbp_state_unlock_get();
-		mbp_state_unlock_set(unlock | UNLOCK_MASK_WHEATON);
+		mbp_state_unlock_set(unlock | UNLOCK_MASK_WHATS_UP);
 		mbp_state_save();
-		mbp_ui_popup("Unlocked", "Wil Wheaton mode enabled.");
+		mbp_ui_popup("Unlocked", "He Man mode enabled.");
+	}
+	//Damon
+	else if (strcmp(code, "DAMON") == 0) {
+		uint16_t unlock = mbp_state_unlock_get();
+		mbp_state_unlock_set(unlock | UNLOCK_MASK_DAMON);
+		mbp_state_save();
+		mbp_ui_popup("Unlocked", "Matt Damon mode enabled.");
 	}
 	//Illusion
-	else if (strcmp(code, "NUKACOLA") == 0) {
+	else if (strcmp(code, "TACOBAR") == 0) {
 		uint16_t unlock = mbp_state_unlock_get();
-		mbp_state_unlock_set(unlock | UNLOCK_MASK_TWITTER);
+		mbp_state_unlock_set(unlock | UNLOCK_MASK_ILUSN);
 		mbp_state_save();
 		mbp_ui_popup("Unlocked", "Illusion Bling unlocked.");
 	}
 
 	//Hack Time
-	else if (strcmp(code, "HAXXOR") == 0) {
+	else if (strcmp(code, "PASSWORD") == 0) {
 		uint16_t unlock = mbp_state_unlock_get();
 		mbp_state_unlock_set(unlock | UNLOCK_MASK_DATE_TIME);
 		mbp_state_save();

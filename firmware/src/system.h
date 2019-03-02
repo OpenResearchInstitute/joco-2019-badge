@@ -58,23 +58,21 @@
 #define SETTING_MASTER_DEFAULT				false
 #define SETTING_UNLOCK_DEFAULT				0
 
-#define UNLOCK_MASK_MASTER_1			0x0001 // master unlock
-#define UNLOCK_MASK_MASTER_2			0x0002 // master unlock
-#define UNLOCK_MASK_MASTER_3			0x0004 // master unlock
-#define UNLOCK_MASK_MASTER_4			0x0008 // master unlock
+#define UNLOCK_MASK_MASTER_1			0x0001
+#define UNLOCK_MASK_MASTER_2			0x0002
+#define UNLOCK_MASK_MASTER_3			0x0004
+#define UNLOCK_MASK_MASTER_4			0x0008
 #define UNLOCK_MASK_DATE_TIME			0x0010 // hack time bling (in terminal)
 #define UNLOCK_MASK_DEFRAG			0x0020 // defrag bling (in terminal)
 #define UNLOCK_MASK_WHATS_UP			0x0040 // 
-#define UNLOCK_MASK_WHEATON    			0x0080 // Wheaton
-#define UNLOCK_MASK_TWITTER			0x0100 // Twitter bling
+#define UNLOCK_MASK_OPPY   			0x0080
+#define UNLOCK_MASK_ILUSN			0x0100
 #define UNLOCK_MASK_SEEKRIT			0x0200 // transio_unused
 #define UNLOCK_MASK_DAMON			0x0400 // DAMON
 #define UNLOCK_MASK_0800			0x0800 // joco_unused
 #define UNLOCK_MASK_1000			0x1000 // joco_unused
 #define UNLOCK_MASK_WH				0x2000 // White Hat detected  (joco_unused)
 #define UNLOCK_MASK_4000			0x4000 // joco_unused
-
-#define UNLOCK_MASK_ALLMASTERS (UNLOCK_MASK_MASTER_1 | UNLOCK_MASK_MASTER_2 | UNLOCK_MASK_MASTER_3 | UNLOCK_MASK_MASTER_4)
 
 //Nordic config
 #include "sdk_config.h"

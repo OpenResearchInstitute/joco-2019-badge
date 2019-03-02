@@ -91,7 +91,7 @@ void capture_notification_callback() {
     util_gfx_print(notifications_state.creature_name);
 
     //Print points
-    util_gfx_set_color(COLOR_RED);
+    util_gfx_set_color(COLOR_WHITE);
     sprintf(temp, "POINTS: %u",  rarity_to_points(notifications_state.creature_percent));
     util_gfx_set_cursor(0, 117);
     util_gfx_print(temp);

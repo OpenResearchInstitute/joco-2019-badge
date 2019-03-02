@@ -515,7 +515,9 @@ static void mbp_menu_bling() {
 	items[menu.count++] = (menu_item_t ) { "MarsKty", "MENU/MARSKTY.ICO", "MENU/MARSKTY.PRV", &mbp_bling_mars_kitty, NULL };
 	items[menu.count++] = (menu_item_t ) { "MrchRob", "MENU/MRCHROBT.ICO", "MENU/MRCHROBT.PRV", &mbp_bling_marching_robots, NULL };
 	items[menu.count++] = (menu_item_t ) { "OldBndr", "MENU/OLDBNDR.ICO", "MENU/OLDBNDR.PRV", &mbp_bling_old_bender, NULL };
+	if ((unlock & UNLOCK_MASK_OPPY) > 0) {
 	items[menu.count++] = (menu_item_t ) { "Oppy", "MENU/OPPY.ICO", "MENU/OPPY.PRV", &mbp_bling_oppy, NULL };
+    }
 	items[menu.count++] = (menu_item_t ) { "PrtlHug", "MENU/PRTLHUG.ICO", "MENU/PRTLHUG.PRV", &mbp_bling_portal_hug, NULL };
 	items[menu.count++] = (menu_item_t ) { "PsyKtty", "MENU/PSYKTTY.ICO", "MENU/PSYCKTTY.PRV", &mbp_bling_psych_kitteh, NULL };
 	items[menu.count++] = (menu_item_t ) { "RMAmp", "MENU/RMAMP.ICO", "MENU/RMAMP.PRV", &mbp_bling_rick_morty_amp, NULL };
@@ -540,7 +542,7 @@ static void mbp_menu_bling() {
 	items[menu.count++] = (menu_item_t ) { "Pirate", "MENU/PIRATES.ICO", "MENU/PIRATES.PRV", &mbp_bling_pirate, NULL };
 
 	//Add illusion bling
-	if ((unlock & UNLOCK_MASK_TWITTER) > 0) {
+	if ((unlock & UNLOCK_MASK_ILUSN) > 0) {
 		items[menu.count++] = (menu_item_t ) { "Illusn", "MENU/ILLUSION.ICO", "MENU/ILLUSION.PRV", &mbp_bling_illusion, NULL };
 	}
 
