@@ -84,7 +84,7 @@ void mbp_system_code() {
 	mbp_ui_input("Code", "Enter Code:", code, 8, INPUT_FORMAT_SCROLL);
 
 	//Oppy
-	else if (strcmp(code, "MER-B") == 0) {
+	if (strcmp(code, "MER-B") == 0) {
 		uint16_t unlock = mbp_state_unlock_get();
 		mbp_state_unlock_set(unlock | UNLOCK_MASK_OPPY);
 		mbp_state_save();
