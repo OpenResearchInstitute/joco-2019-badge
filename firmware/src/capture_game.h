@@ -42,7 +42,6 @@ extern uint16_t capture_internal_broadcast;
 // Testing
 #define DEBUG_USE_SEQUENTIAL_CREATURES
 #define DEBUG_CAPTURE_ALWAYS_SCORE
-#define DEBUG_DISPLAY_ALL_IN_BLING
 
 // Times are in seconds
 #define MINUTES_10 600
