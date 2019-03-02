@@ -320,40 +320,43 @@ void mbp_bling_captured(void *data) {
     background_was_running = mbp_background_led_running();
     mbp_background_led_stop();
 
-    for (uint16_t i = 1; ((i <= capture_state.max_index) && (!done)); i++) {
-        if ((DEBUG_DISPLAY_ALL_IN_BLING) || mbp_state_captured_is_captured(i)) {
-            if (!read_creature_data(i, &creature_data)) {
-                continue;
-            }
+    done = false;
+    while (!done) {
+        for (uint16_t i = 1; ((i <= capture_state.max_index) && (!done)); i++) {
+            if ((DEBUG_DISPLAY_ALL_IN_BLING) || mbp_state_captured_is_captured(i)) {
+                if (!read_creature_data(i, &creature_data)) {
+                    continue;
+                }
 
-            util_gfx_cursor_area_reset();
-            mbp_ui_cls();
+                util_gfx_cursor_area_reset();
+                mbp_ui_cls();
 
-            util_gfx_set_font(FONT_LARGE);
-            util_gfx_set_color(COLOR_WHITE);
-            util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
-            util_gfx_print(creature_data.name);
+                util_gfx_set_font(FONT_LARGE);
+                util_gfx_set_color(COLOR_WHITE);
+                util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
+                util_gfx_print(creature_data.name);
 
-            //Print points
-            util_gfx_set_color(COLOR_RED);
-            sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
-            util_gfx_set_cursor(0, 117);
-            util_gfx_print(temp);
+                //Print points
+                util_gfx_set_color(COLOR_RED);
+                sprintf(temp, "POINTS: %u",  rarity_to_points(creature_data.percent));
+                util_gfx_set_cursor(0, 117);
+                util_gfx_print(temp);
 
-            sprintf(temp, "CAPTURE/%04d.RAW", i);
-            button = notification_filebased_bling(temp, "BLING/CIRCLES.RGB", CAPTURE_BLING_DELAY);
-            util_button_clear();    //Clean up button state
+                sprintf(temp, "CAPTURE/%04d.RAW", i);
+                button = notification_filebased_bling(temp, "BLING/CIRCLES.RGB", CAPTURE_BLING_DELAY);
+                util_button_clear();    //Clean up button state
 
-            switch (button) {
-            case BUTTON_MASK_UP:
-            case BUTTON_MASK_DOWN:
-            case BUTTON_MASK_LEFT:
-            case BUTTON_MASK_RIGHT:
-                done = true;
-                break; // stop displaying the bling
-            case BUTTON_MASK_ACTION:
-            default:
-                break;
+                switch (button) {
+                case BUTTON_MASK_UP:
+                case BUTTON_MASK_DOWN:
+                case BUTTON_MASK_LEFT:
+                case BUTTON_MASK_RIGHT:
+                    done = true;
+                    break; // stop displaying the bling
+                case BUTTON_MASK_ACTION:
+                default:
+                    break;
+                }
             }
         }
     }
