@@ -316,8 +316,11 @@ void mbp_bling_captured(void *data) {
         return;
     }
 
+    background_was_running = mbp_background_led_running();
+    mbp_background_led_stop();
+
     for (uint16_t i = 1; i <= capture_state.max_index; i++) {
-        if (mbp_state_captured_is_captured(i)) {
+        if ((DEBUG_DISPLAY_ALL_IN_BLING) || mbp_state_captured_is_captured(i)) {
             if (!read_creature_data(i, &creature_data)) {
                 continue;
             }
@@ -325,9 +328,6 @@ void mbp_bling_captured(void *data) {
             util_gfx_cursor_area_reset();
             mbp_ui_cls();
 
-            background_was_running = mbp_background_led_running();
-            mbp_background_led_stop();
-            
             util_gfx_set_font(FONT_LARGE);
             util_gfx_set_color(COLOR_WHITE);
             util_gfx_set_cursor(0, NOTIFICATION_UI_MARGIN);
@@ -356,11 +356,10 @@ void mbp_bling_captured(void *data) {
                 break;
             }
         }
-
-        //Only start background LED display if previously running
-        if (background_was_running) {
-            mbp_background_led_start();
-        }
+    }
+    //Only start background LED display if previously running
+    if (background_was_running) {
+        mbp_background_led_start();
     }
 }
 
