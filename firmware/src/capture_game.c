@@ -306,7 +306,7 @@ void mbp_bling_captured(void *data) {
     bool done;
     creature_data_t creature_data;
 
-    if (mbp_state_capture_count_get() == 0) {
+    if ((mbp_state_capture_count_get() == 0) && (!(DEBUG_DISPLAY_ALL_IN_BLING))) {
         util_gfx_cursor_area_reset();
         mbp_ui_cls();
         util_gfx_set_font(FONT_LARGE);

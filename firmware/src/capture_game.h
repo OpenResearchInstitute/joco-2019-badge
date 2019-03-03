@@ -45,7 +45,7 @@ extern uint16_t capture_internal_broadcast;
 //#define CAPTURE_FAST_TEST
 
 // define this to true for testing
-#define DEBUG_DISPLAY_ALL_IN_BLING false
+#define DEBUG_DISPLAY_ALL_IN_BLING true
 
 // Times are in seconds
 #define MINUTES_10 600
