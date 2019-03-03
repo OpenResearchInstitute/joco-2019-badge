@@ -5,7 +5,7 @@
 cp src/_build/nrf52832_xxaa.hex .
 cp $SDK_ROOT/components/softdevice/s132/hex/s132_nrf52_3.0.0_softdevice.hex .
 
-$NRFJ_BIN/mergehex/mergehex -m nrf52832_xxaa.hex s132_nrf52_3.0.0_softdevice.hex -o joco_2019_1.9.hex
+$NRFJ_BIN/mergehex/mergehex -m nrf52832_xxaa.hex s132_nrf52_3.0.0_softdevice.hex -o joco_2019_2.0.hex
 
 rm nrf52832_xxaa.hex
 rm s132_nrf52_3.0.0_softdevice.hex
