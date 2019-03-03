@@ -29,8 +29,9 @@ char tmp_fname[20];
 uint16_t capture_internal_broadcast;
 uint16_t dupe_cooldown = 0;
 
-uint16_t __choose_creature(void);
+bool show_all_creatures = false;
 
+uint16_t __choose_creature(void);
 
 APP_TIMER_DEF(m_capture_timer);
 
@@ -300,13 +301,12 @@ void capture_process_heard(char *name) {
 void mbp_bling_captured(void *data) {
     // Display all captures creatures in sequence
     char temp[20];
-
     uint8_t button;
     bool background_was_running;
     bool done;
     creature_data_t creature_data;
 
-    if ((mbp_state_capture_count_get() == 0) && (!(DEBUG_DISPLAY_ALL_IN_BLING))) {
+    if ((mbp_state_capture_count_get() == 0) && (!show_all_creatures)) {
         util_gfx_cursor_area_reset();
         mbp_ui_cls();
         util_gfx_set_font(FONT_LARGE);
@@ -323,7 +323,7 @@ void mbp_bling_captured(void *data) {
     done = false;
     while (!done) {
         for (uint16_t i = 1; ((i <= capture_state.max_index) && (!done)); i++) {
-            if ((DEBUG_DISPLAY_ALL_IN_BLING) || mbp_state_captured_is_captured(i)) {
+            if (show_all_creatures || mbp_state_captured_is_captured(i)) {
                 if (!read_creature_data(i, &creature_data)) {
                     continue;
                 }

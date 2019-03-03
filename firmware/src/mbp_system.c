@@ -132,6 +132,11 @@ void mbp_system_code() {
 		cheat_at_mastermind = true;		// not saved!
 	}
 #endif
+#if INCLUDE_CAPTURE
+	else if (strcmp(code, "SHOWME") == 0) {
+		show_all_creatures = true;		// not saved!
+	}
+#endif
 	//Everything else
 	else {
 		mbp_ui_error(":(");
