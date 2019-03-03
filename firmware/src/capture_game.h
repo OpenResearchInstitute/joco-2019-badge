@@ -40,9 +40,12 @@ extern capture_state_t capture_state;
 extern uint16_t capture_internal_broadcast;
 
 // Testing
-#define DEBUG_USE_SEQUENTIAL_CREATURES
-#define DEBUG_CAPTURE_ALWAYS_SCORE
-#define DEBUG_DISPLAY_ALL_IN_BLING true
+//#define DEBUG_USE_SEQUENTIAL_CREATURES
+//#define DEBUG_CAPTURE_ALWAYS_SCORE
+//#define CAPTURE_FAST_TEST
+
+// define this to true for testing
+#define DEBUG_DISPLAY_ALL_IN_BLING false
 
 // Times are in seconds
 #define MINUTES_10 600
@@ -65,7 +68,6 @@ extern uint16_t capture_internal_broadcast;
 // Sending parameters
 // Remember when setting these that each badge can 'capture' the creatures that it broadcasts, so every badge has
 // an opportunity at least this often. 
-#define CAPTURE_FAST_TEST
 #ifdef CAPTURE_FAST_TEST
 #define CAPTURE_SENDING_INTERVAL 60
 #define CAPTURE_SENDING_INTERVAL_JITTER 0
@@ -89,7 +91,7 @@ typedef struct {
 #define CAPTURE_SEEN_NOTIFICATION_DISPLAY_LENGTH 5 // Seconds
 
 // How long to display each creature in bling
-#define CAPTURE_BLING_DELAY 2000 // in mS
+#define CAPTURE_BLING_DELAY 3000 // in mS
 
 extern uint16_t decode_creature_name(char *);
 extern uint16_t rarity_to_points(uint8_t);
