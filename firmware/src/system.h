@@ -29,7 +29,7 @@
  *****************************************************************************/
 #ifndef SYSTEM_H_
 #define SYSTEM_H_
-#define VERSION_SD						33
+#define VERSION_SD						34
 
 // Various build options
 #define INCLUDE_CAPTURE true // do we include the capture game?
