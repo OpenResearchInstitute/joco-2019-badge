@@ -90,15 +90,36 @@ void mbp_system_code() {
 		mbp_state_save();
 		mbp_ui_popup("Unlocked", "Oppy mode enabled.");
 	}
+/*
+ *
+ *  WARNING TO JOCO 2019 PARTICIPANTS
+ *
+ *  The SD cards on the vast majority of the badges that were updated on the cruise did not have
+ *  have the bling files to support the next two unlocked blings. If you enter these unlock codes,
+ *  you will render your badge essentially unusable because you won't be able to navigate menus.
+ *  If this happens, you can remedy it by copying the following files from this repository to
+ *  the SD card on your badge:
+ *
+ *  SD Image/BLING/AND!XOR/DAMON1.RAW
+ *  SD Image/BLING/AND!XOR/DAMON2.RAW
+ *  SD Image/BLING/AND!XOR/DAMON3.RAW
+ *  SD Image/BLING/AND!XOR/DAMON4.RAW
+ *  SD Image/BLING/AND!XOR/HEMANHEY.RAW
+ *  SD Image/MENU/DAMON.ICO
+ *  SD Image/MENU/DAMON.PRV
+ *  SD Image/MENU/HEYYEYA.ICO
+ *  SD Image/MENU/HEYYEYA.PRV
+ *
+ */
 	//He Man
-	else if (strcmp(code, "CRINGER") == 0) {
+	else if (strcmp(code, "CRINGER") == 0) { // SEE WARNING ABOVE
 		uint16_t unlock = mbp_state_unlock_get();
 		mbp_state_unlock_set(unlock | UNLOCK_MASK_WHATS_UP);
 		mbp_state_save();
 		mbp_ui_popup("Unlocked", "He Man mode enabled.");
 	}
 	//Damon
-	else if (strcmp(code, "DAMON") == 0) {
+	else if (strcmp(code, "DAMON") == 0) { // SEE WARNING ABOVE
 		uint16_t unlock = mbp_state_unlock_get();
 		mbp_state_unlock_set(unlock | UNLOCK_MASK_DAMON);
 		mbp_state_save();
